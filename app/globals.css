@@ -1294,6 +1294,31 @@ button {
   letter-spacing: 0.02em;
 }
 
+.enhancement-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.generation-status {
+  color: var(--ink-muted);
+  font-size: 0.78rem;
+}
+
+.generated-summary {
+  display: grid;
+  gap: 1rem;
+}
+
+.generated-summary p {
+  margin: 0;
+}
+
+.summary-concepts {
+  margin-top: 0.2rem;
+}
+
 @media (max-width: 1080px) {
   .learning-header {
     grid-template-columns: auto 1fr;

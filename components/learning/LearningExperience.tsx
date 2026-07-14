@@ -168,7 +168,7 @@ export function LearningExperience({
   if (phase === "intro") {
     return <main className="site-shell"><LessonIntroduction lesson={lesson} onStart={() => setPhase("explore")} /></main>;
   }
-  if (phase === "assessment") return <main><AssessmentPanel lesson={lesson} onFinish={finishAssessment} /></main>;
+  if (phase === "assessment") return <main><AssessmentPanel lesson={lesson} session={session} onFinish={finishAssessment} /></main>;
   if (phase === "summary") return <main><LearningSummary lesson={lesson} session={session} /></main>;
 
   const focusedCharacter = lesson.characters.find((item) => item.id === focusedCharacterId) ?? null;
