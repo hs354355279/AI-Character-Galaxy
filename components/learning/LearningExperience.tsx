@@ -16,6 +16,7 @@ import { evaluateMission, type MissionEvaluation } from "@/lib/missions/evaluate
 import type { LessonPack } from "@/lib/lessons/schema";
 import {
   createLearningSession,
+  loadLearningSession,
   saveLearningSession,
   updateLearningSession,
   type AssessmentAnswer,
@@ -46,6 +47,13 @@ export function LearningExperience({
   const [session, setSession] = useState<LearningSession>(
     initialSession ?? createLearningSession(lesson.id),
   );
+  const [sessionReady, setSessionReady] = useState(Boolean(initialSession));
+  const [explorationFinished, setExplorationFinished] = useState(
+    Boolean(
+      initialSession &&
+        lesson.missions.every((mission) => initialSession.completedMissionIds.includes(mission.id)),
+    ),
+  );
   const firstIncomplete = Math.max(
     0,
     lesson.missions.findIndex((mission) => !session.completedMissionIds.includes(mission.id)),
@@ -60,12 +68,43 @@ export function LearningExperience({
   const [visibleHint, setVisibleHint] = useState<string | null>(null);
 
   const mission = lesson.missions[missionIndex];
-  const allComplete = lesson.missions.every((item) => session.completedMissionIds.includes(item.id));
+  const allMissionsRecorded = lesson.missions.every((item) =>
+    session.completedMissionIds.includes(item.id),
+  );
   const hintId = `${mission?.id ?? "none"}:0`;
 
   useEffect(() => {
-    if (typeof window !== "undefined") saveLearningSession(session, window.sessionStorage);
-  }, [session]);
+    if (initialSession || typeof window === "undefined") return;
+    const restored = loadLearningSession(lesson.id, window.sessionStorage);
+    const hasProgress =
+      restored.visitedCharacterIds.length > 0 ||
+      restored.visitedRelationshipIds.length > 0 ||
+      restored.completedMissionIds.length > 0 ||
+      restored.assessmentAnswers.length > 0;
+    const restoredMissionIndex = lesson.missions.findIndex(
+      (mission) => !restored.completedMissionIds.includes(mission.id),
+    );
+    let active = true;
+    queueMicrotask(() => {
+      if (!active) return;
+      setSession(restored);
+      if (hasProgress) setPhase("explore");
+      setMissionIndex(restoredMissionIndex >= 0 ? restoredMissionIndex : lesson.missions.length - 1);
+      setExplorationFinished(
+        lesson.missions.every((mission) => restored.completedMissionIds.includes(mission.id)),
+      );
+      setSessionReady(true);
+    });
+    return () => {
+      active = false;
+    };
+  }, [initialSession, lesson.id, lesson.missions]);
+
+  useEffect(() => {
+    if (sessionReady && typeof window !== "undefined") {
+      saveLearningSession(session, window.sessionStorage);
+    }
+  }, [session, sessionReady]);
 
   const selectCharacter = (id: string) => {
     setFocusedCharacterId(id);
@@ -94,6 +133,7 @@ export function LearningExperience({
   const continueMission = () => {
     const nextIndex = lesson.missions.findIndex((item, index) => index > missionIndex && !session.completedMissionIds.includes(item.id));
     if (nextIndex >= 0) setMissionIndex(nextIndex);
+    else if (allMissionsRecorded) setExplorationFinished(true);
     setSelectedCharacterIds([]);
     setSelectedRelationshipIds([]);
     setFocusedCharacterId(null);
@@ -115,6 +155,7 @@ export function LearningExperience({
 
   const reset = () => {
     setSession(createLearningSession(lesson.id));
+    setExplorationFinished(false);
     setMissionIndex(0);
     setPhase("intro");
     setSelectedCharacterIds([]);
@@ -148,7 +189,7 @@ export function LearningExperience({
         </div>
       </header>
       {!available && <div className="webgl-status" role="status">3D is unavailable on this device. The complete lesson is open in the 2D relationship list.</div>}
-      {allComplete ? (
+      {explorationFinished ? (
         <section className="missions-complete glass-material">
           <p className="eyebrow">Exploration complete</p>
           <h1>You mapped the full learning path.</h1>
