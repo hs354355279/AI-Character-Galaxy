@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "1.0",
+  "lessonId": "french-revolution",
+  "locale": "en",
+  "reviewedAt": "2026-07-14",
+  "sources": [
+    {
+      "id": "fr-wikipedia",
+      "title": "French Revolution and linked biographies",
+      "url": "https://en.wikipedia.org/wiki/French_Revolution",
+      "publisher": "Wikipedia contributors",
+      "license": "CC BY-SA 4.0",
+      "retrievedAt": "2026-07-14",
+      "contentHash": "4a4f3d4fb6e29a83171404ae82e3a79e3d68da2a7d64c404824a7ce60743a36b",
+      "allowedUsage": "facts-and-paraphrase",
+      "normalizedExcerpt": "Reviewed factual notes cover the constitutional monarchy, competing revolutionary factions, the influence of popular-sovereignty arguments, the changing alliance between Danton and Robespierre, and the political conflict surrounding Louis XVI. No direct quotation is approved for generation.",
+      "attributionText": "Adapted summaries from Wikipedia contributors, available under CC BY-SA 4.0; individual page histories provide author attribution."
+    },
+    {
+      "id": "fr-wikidata",
+      "title": "Wikidata entities for French Revolution figures",
+      "url": "https://www.wikidata.org/wiki/Q6534",
+      "publisher": "Wikidata contributors",
+      "license": "CC0 1.0",
+      "retrievedAt": "2026-07-14",
+      "contentHash": "83f06643530f6be67e91e9ba6d100b95d6693ada8f2e8fd456d7553209aa8564",
+      "allowedUsage": "metadata-only",
+      "normalizedExcerpt": "Reviewed metadata identifies the French Revolution and the public historical figures represented in this lesson. It may support entity identity and naming only, not narrative claims or quotations.",
+      "attributionText": "Structured identifiers and metadata from Wikidata contributors, released under CC0 1.0."
+    }
+  ]
+}

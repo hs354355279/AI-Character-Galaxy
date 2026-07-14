@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "1.0",
+  "lessonId": "romeo-and-juliet",
+  "locale": "en",
+  "reviewedAt": "2026-07-14",
+  "sources": [
+    {
+      "id": "rj-gutenberg",
+      "title": "Romeo and Juliet, eBook 1513",
+      "url": "https://www.gutenberg.org/ebooks/1513",
+      "publisher": "Project Gutenberg",
+      "license": "Public domain in the United States",
+      "retrievedAt": "2026-07-14",
+      "contentHash": "a477899f6aaf14625630d52903f19b4d5c1b03e7e0f74a0af7cfec52f6b5189e",
+      "allowedUsage": "public-domain-text",
+      "normalizedExcerpt": "Reviewed plot notes cover the feud between the Montague and Capulet households, Romeo and Juliet's secret relationship, Friar Laurence's plan, Mercutio and Tybalt's fatal conflict, and the failed delivery of crucial information. Evidence must include act and scene locators.",
+      "attributionText": "Evidence locators refer to Project Gutenberg eBook 1513, a public-domain English edition in the United States."
+    },
+    {
+      "id": "rj-wikidata",
+      "title": "Wikidata entity for Romeo and Juliet",
+      "url": "https://www.wikidata.org/wiki/Q83186",
+      "publisher": "Wikidata contributors",
+      "license": "CC0 1.0",
+      "retrievedAt": "2026-07-14",
+      "contentHash": "977b8d3c0f49e1777ba6944a4128a9463e8b1113ec942dfb13ac79bcc3b1bbf4",
+      "allowedUsage": "metadata-only",
+      "normalizedExcerpt": "Reviewed metadata identifies the dramatic work and its public literary characters. It may support work identity, character naming, and identifiers only, not plot evidence or quotations.",
+      "attributionText": "Structured work and character metadata from Wikidata contributors, released under CC0 1.0."
+    }
+  ]
+}
