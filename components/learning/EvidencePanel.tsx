@@ -1,14 +1,17 @@
 import Link from "next/link";
+import { AiInsight } from "@/components/learning/AiInsight";
 import type { CharacterNode, LessonPack, RelationshipEdge } from "@/lib/lessons/schema";
 
 export function EvidencePanel({
   lesson,
   character,
   relationship,
+  sessionId,
 }: {
   lesson: LessonPack;
   character: CharacterNode | null;
   relationship: RelationshipEdge | null;
+  sessionId: string;
 }) {
   if (relationship) {
     const from = lesson.characters.find((item) => item.id === relationship.fromCharacterId)!;
@@ -22,6 +25,7 @@ export function EvidencePanel({
         <div className="evidence-callout"><strong>What the source supports</strong><p>{relationship.evidenceSummary}</p>{relationship.evidenceLocation && <small>{relationship.evidenceLocation}</small>}</div>
         {relationship.isDisputed && <div className="dispute-note"><strong>Interpretation note</strong><p>{relationship.disputeNote}</p></div>}
         <Link href={`/sources/${lesson.slug}`}>Open lesson sources ↗</Link>
+        <AiInsight key={relationship.id} lessonId={lesson.id} relationshipId={relationship.id} sessionId={sessionId} />
       </div>
     );
   }
@@ -37,6 +41,7 @@ export function EvidencePanel({
         <p>{character.summary}</p>
         <div className="tag-list">{character.learningTags.map((tag) => <span key={tag}>{tag.replaceAll("-", " ")}</span>)}</div>
         <Link href={`/sources/${lesson.slug}`}>Open character sources ↗</Link>
+        <AiInsight key={character.id} lessonId={lesson.id} characterId={character.id} sessionId={sessionId} />
       </div>
     );
   }

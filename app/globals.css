@@ -1226,6 +1226,74 @@ button {
   margin-top: 1rem;
 }
 
+.ai-insight {
+  display: grid;
+  gap: 0.8rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid rgba(145, 201, 255, 0.22);
+  border-radius: 1.15rem;
+  background: linear-gradient(145deg, rgba(42, 101, 180, 0.13), rgba(129, 95, 255, 0.08));
+}
+
+.ai-insight-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.ai-insight-heading .eyebrow {
+  margin-bottom: 0.25rem;
+  font-size: 0.62rem;
+}
+
+.ai-action {
+  min-height: 2.25rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid rgba(145, 201, 255, 0.28);
+  border-radius: 999px;
+  color: #eaf5ff;
+  background: rgba(145, 201, 255, 0.09);
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.ai-action:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.ai-insight-result {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.ai-insight-result p,
+.ai-insight-result small,
+.ai-status {
+  margin: 0;
+  color: var(--ink-muted);
+}
+
+.ai-insight-result strong {
+  color: #ddecff;
+  font-size: 0.82rem;
+}
+
+.ai-source-label {
+  width: max-content;
+  padding: 0.28rem 0.5rem;
+  border-radius: 999px;
+  color: #bde2ff;
+  background: rgba(90, 176, 255, 0.12);
+  font-size: 0.68rem;
+  font-weight: 780;
+  letter-spacing: 0.02em;
+}
+
 @media (max-width: 1080px) {
   .learning-header {
     grid-template-columns: auto 1fr;

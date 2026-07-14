@@ -168,7 +168,12 @@ export function LearningExperience({
             )}
           </section>
           <motion.aside className="workspace-panel evidence-panel glass-material" initial={reduceMotion ? false : { opacity: 0, x: 18 }} animate={{ opacity: 1, x: 0 }} transition={{ type: "spring", bounce: 0, duration: 0.38 }}>
-            <EvidencePanel lesson={lesson} character={focusedCharacter} relationship={focusedRelationship} />
+            <EvidencePanel
+              lesson={lesson}
+              character={focusedCharacter}
+              relationship={focusedRelationship}
+              sessionId={`${lesson.id}:${session.startedAt}`}
+            />
           </motion.aside>
         </div>
       )}
