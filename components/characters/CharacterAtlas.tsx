@@ -5,6 +5,11 @@ import { useMemo, useState, type CSSProperties } from "react";
 import { SmoothScrollProvider } from "@/components/motion/SmoothScrollProvider";
 import { ExhibitionHeader } from "@/components/navigation/ExhibitionHeader";
 import { CharacterFilters } from "@/components/characters/CharacterFilters";
+import { CharacterResearchForm } from "@/components/characters/CharacterResearchForm";
+import {
+  CharacterResearchResult,
+  type CharacterResearchResponse,
+} from "@/components/characters/CharacterResearchResult";
 import {
   filterCharacters,
   type CharacterDirectoryEntry,
@@ -18,6 +23,7 @@ const initialFilters: Filters = { query: "", lessonId: "all", groupId: "all" };
 
 export function CharacterAtlas({ entries }: { entries: CharacterDirectoryEntry[] }) {
   const [filters, setFilters] = useState(initialFilters);
+  const [researchResult, setResearchResult] = useState<CharacterResearchResponse | null>(null);
   const filtered = useMemo(() => filterCharacters(entries, filters), [entries, filters]);
 
   return (
@@ -33,10 +39,20 @@ export function CharacterAtlas({ entries }: { entries: CharacterDirectoryEntry[]
         </div>
       </header>
 
+      <section className="character-research" aria-labelledby="character-research-title">
+        <div className="character-research-intro">
+          <p>01 · Open research</p>
+          <h2 id="character-research-title">Bring another person<br />into view.</h2>
+          <span>GPT‑5.6 searches current web sources, verifies the identity, and returns a structured learning profile. Generated research stays separate from reviewed course content.</span>
+        </div>
+        <CharacterResearchForm onResult={setResearchResult} />
+        {researchResult ? <CharacterResearchResult result={researchResult} /> : null}
+      </section>
+
       <section className="character-atlas-directory" aria-labelledby="character-atlas-title">
         <div className="character-atlas-toolbar">
           <div>
-            <p>01 · Reviewed atlas</p>
+            <p>02 · Reviewed atlas</p>
             <h2 id="character-atlas-title">Character index</h2>
           </div>
           <CharacterFilters entries={entries} value={filters} onChange={setFilters} />
