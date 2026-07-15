@@ -20,7 +20,7 @@ test("keyboard and reduced-motion path preserves the complete 2D lesson", async 
     .getByRole("article")
     .filter({ hasText: "French Revolution" })
     .getByRole("link", { name: /Start exploration/ });
-  for (let press = 0; press < 12; press += 1) {
+  for (let press = 0; press < 24; press += 1) {
     await page.keyboard.press("Tab");
     if (await firstLesson.evaluate((element) => element === document.activeElement)) break;
   }

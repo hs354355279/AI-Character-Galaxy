@@ -10,7 +10,7 @@ afterEach(() => {
 Object.defineProperty(window, "matchMedia", {
   writable: true,
   value: (query: string) => ({
-    matches: false,
+    matches: query === "(prefers-reduced-motion: reduce)",
     media: query,
     onchange: null,
     addListener: () => undefined,
@@ -20,3 +20,22 @@ Object.defineProperty(window, "matchMedia", {
     dispatchEvent: () => false,
   }),
 });
+
+class TestResizeObserver implements ResizeObserver {
+  constructor(callback: ResizeObserverCallback) {
+    void callback;
+  }
+
+  observe(target: Element, options?: ResizeObserverOptions) {
+    void target;
+    void options;
+  }
+
+  unobserve(target: Element) {
+    void target;
+  }
+
+  disconnect() {}
+}
+
+globalThis.ResizeObserver = TestResizeObserver;
