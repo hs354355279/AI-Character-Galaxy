@@ -23,6 +23,13 @@ export interface RelationshipScores {
   context: number;
 }
 
+export const MIN_RELATIONSHIP_SEPARATION = 2.2;
+export const RELATIONSHIP_SHELLS = {
+  direct: { min: 6.8, max: 9.2 },
+  "second-degree": { min: 10.2, max: 13.2 },
+  context: { min: 13.5, max: 15.5 },
+} as const;
+
 const TYPE_VALENCE = {
   romance: 1,
   friendship: 0.8,
@@ -191,6 +198,8 @@ function directPoint(
   pack: LessonPack,
   targetId: string,
   characterId: string,
+  sectorIndex: number,
+  sectorCount: number,
 ): RelationshipSpacePoint {
   const edges = pack.relationships.filter(
     (edge) => otherCharacterId(edge, targetId) === characterId,
@@ -211,12 +220,16 @@ function directPoint(
   const lane = hashUnit(`${pack.layoutSeed}:${targetId}:${characterId}:lane`) - 0.5;
   const verticalLane = hashUnit(`${characterId}:${targetId}:vertical`) - 0.5;
   const depthLane = hashUnit(`${targetId}:${characterId}:depth`) - 0.5;
+  const sectorAngle = ((sectorIndex + 0.5) / Math.max(1, sectorCount)) * Math.PI * 2
+    + lane * 0.24;
   const direction = normalize({
-    x: scores.direction / totalWeight + lane * 0.42,
-    y: scores.valence / totalWeight + verticalLane * 0.12,
-    z: scores.context / totalWeight + depthLane * 0.12,
+    x: scores.direction / totalWeight + Math.cos(sectorAngle) * 0.62,
+    y: scores.valence / totalWeight + verticalLane * 0.18,
+    z: scores.context / totalWeight + Math.sin(sectorAngle) * 0.62 + depthLane * 0.14,
   });
-  const radius = 6.5 - strongest * 0.65;
+  const strength = clamp(strongest / 5, 0, 1);
+  const radius = RELATIONSHIP_SHELLS.direct.max
+    - strength * (RELATIONSHIP_SHELLS.direct.max - RELATIONSHIP_SHELLS.direct.min);
   const point = scale(direction, radius);
 
   return {
@@ -252,6 +265,33 @@ function rotateAroundY(point: GalaxyPoint, angle: number): GalaxyPoint {
   };
 }
 
+function rotateAroundX(point: GalaxyPoint, angle: number): GalaxyPoint {
+  const cosine = Math.cos(angle);
+  const sine = Math.sin(angle);
+  return {
+    x: point.x,
+    y: point.y * cosine - point.z * sine,
+    z: point.y * sine + point.z * cosine,
+  };
+}
+
+function constrainContextDepth(point: GalaxyPoint): GalaxyPoint {
+  const z = clamp(point.z, -0.72, 0.72);
+  const horizontalLength = Math.hypot(point.x, point.y);
+  const horizontalTarget = Math.sqrt(Math.max(0.001, 1 - z * z));
+  if (horizontalLength < 0.0001) return { x: horizontalTarget, y: 0, z };
+  const multiplier = horizontalTarget / horizontalLength;
+  return { x: point.x * multiplier, y: point.y * multiplier, z };
+}
+
+function shellRadius(
+  layer: Exclude<RelationshipLayer, "origin" | "direct">,
+  seed: string,
+): number {
+  const shell = RELATIONSHIP_SHELLS[layer];
+  return shell.min + hashUnit(seed) * (shell.max - shell.min);
+}
+
 function placeSeparated(
   candidate: RelationshipSpacePoint,
   placed: RelationshipSpacePoint[],
@@ -261,11 +301,15 @@ function placeSeparated(
   const base = normalize(candidate);
   const direction = hashUnit(seed) > 0.5 ? 1 : -1;
 
-  for (let attempt = 0; attempt < 28; attempt += 1) {
-    const angle = direction * Math.ceil(attempt / 2) * 0.105 * (attempt % 2 === 0 ? 1 : -1);
-    const moved = scale(rotateAroundY(base, angle), candidate.radius);
+  for (let attempt = 0; attempt < 96; attempt += 1) {
+    const yaw = direction * Math.ceil(attempt / 2) * 0.17 * (attempt % 2 === 0 ? 1 : -1);
+    const pitch = Math.sin(attempt * 1.73 + hashUnit(`${seed}:pitch`) * Math.PI) * 0.16;
+    let movedDirection = normalize(rotateAroundX(rotateAroundY(base, yaw), pitch));
+    if (candidate.layer === "context") movedDirection = constrainContextDepth(movedDirection);
+    const moved = scale(movedDirection, candidate.radius);
     const separated = placed.every(
-      (point) => Math.hypot(moved.x - point.x, moved.y - point.y, moved.z - point.z) > 1.05,
+      (point) => Math.hypot(moved.x - point.x, moved.y - point.y, moved.z - point.z)
+        >= MIN_RELATIONSHIP_SEPARATION,
     );
     if (separated) {
       return {
@@ -277,13 +321,25 @@ function placeSeparated(
     }
   }
 
-  const fallback = normalize({
-    x: base.x + (hashUnit(`${seed}:x`) - 0.5) * 0.8,
-    y: base.y + (hashUnit(`${seed}:y`) - 0.5) * 0.8,
-    z: base.z + (hashUnit(`${seed}:z`) - 0.5) * 0.8,
-  });
-  const moved = scale(fallback, candidate.radius);
-  return { ...candidate, x: round(moved.x), y: round(moved.y), z: round(moved.z) };
+  for (let attempt = 0; attempt < 256; attempt += 1) {
+    let fallback = contextualDirection(`${seed}:fallback:${attempt}`);
+    if (candidate.layer === "context") fallback = constrainContextDepth(fallback);
+    const moved = scale(fallback, candidate.radius);
+    const separated = placed.every(
+      (point) => Math.hypot(moved.x - point.x, moved.y - point.y, moved.z - point.z)
+        >= MIN_RELATIONSHIP_SEPARATION,
+    );
+    if (separated) {
+      return {
+        ...candidate,
+        x: round(moved.x),
+        y: round(moved.y),
+        z: round(moved.z),
+      };
+    }
+  }
+
+  throw new Error(`Unable to place relationship-space point: ${seed}`);
 }
 
 export function createRelationshipSpace(
@@ -298,55 +354,68 @@ export function createRelationshipSpace(
   const points = new Map<string, RelationshipSpacePoint>();
   const placed: RelationshipSpacePoint[] = [];
 
-  for (const character of pack.characters) {
-    const degree = degrees.get(character.id);
-    let candidate: RelationshipSpacePoint;
+  const origin = { x: 0, y: 0, z: 0, layer: "origin", degree: 0, radius: 0 } satisfies RelationshipSpacePoint;
+  points.set(targetId, origin);
+  placed.push(origin);
 
-    if (character.id === targetId) {
-      candidate = { x: 0, y: 0, z: 0, layer: "origin", degree: 0, radius: 0 };
-    } else if (degree === 1) {
-      candidate = directPoint(pack, targetId, character.id);
-    } else if (degree === 2) {
-      const firstHop = firstHops.get(character.id)!;
-      const anchor = points.get(firstHop) ?? directPoint(pack, targetId, firstHop);
-      const radius = 7.2 + hashUnit(`${pack.layoutSeed}:${targetId}:${character.id}:degree2`) * 2.2;
-      const semantic = normalize(anchor);
-      const contextual = contextualDirection(`${targetId}:${character.id}:degree2`);
-      const direction = normalize({
-        x: semantic.x * 0.78 + contextual.x * 0.22,
-        y: semantic.y * 0.78 + contextual.y * 0.22,
-        z: semantic.z * 0.78 + contextual.z * 0.22,
-      });
-      const point = scale(direction, radius);
-      candidate = {
-        x: round(point.x),
-        y: round(point.y),
-        z: round(point.z),
-        layer: "second-degree",
-        degree,
-        radius: round(radius),
-      };
-    } else {
-      const radius = 10.5 + hashUnit(`${pack.layoutSeed}:${targetId}:${character.id}:context`) * 1.5;
-      const point = scale(contextualDirection(`${targetId}:${character.id}:context`), radius);
-      candidate = {
-        x: round(point.x),
-        y: round(point.y),
-        z: round(point.z),
-        layer: "context",
-        degree: degree ?? null,
-        radius: round(radius),
-      };
-    }
-
-    const point = placeSeparated(
-      candidate,
-      placed,
-      `${pack.layoutSeed}:${targetId}:${character.id}:separate`,
-    );
-    points.set(character.id, point);
+  const directIds = pack.characters
+    .filter((character) => degrees.get(character.id) === 1)
+    .map((character) => character.id)
+    .sort();
+  directIds.forEach((characterId, index) => {
+    const candidate = directPoint(pack, targetId, characterId, index, directIds.length);
+    const point = placeSeparated(candidate, placed, `${pack.layoutSeed}:${targetId}:${characterId}:separate`);
+    points.set(characterId, point);
     placed.push(point);
-  }
+  });
+
+  const secondDegreeIds = pack.characters
+    .filter((character) => degrees.get(character.id) === 2)
+    .map((character) => character.id)
+    .sort();
+  secondDegreeIds.forEach((characterId, index) => {
+    const firstHop = firstHops.get(characterId)!;
+    const anchor = points.get(firstHop)!;
+    const semantic = normalize(anchor);
+    const sectorAngle = ((index + 0.5) / Math.max(1, secondDegreeIds.length)) * Math.PI * 2
+      + (hashUnit(`${targetId}:${characterId}:sector`) - 0.5) * 0.34;
+    const direction = normalize({
+      x: semantic.x * 0.48 + Math.cos(sectorAngle) * 1.05,
+      y: semantic.y * 0.68 + (hashUnit(`${characterId}:height`) - 0.5) * 0.42,
+      z: semantic.z * 0.48 + Math.sin(sectorAngle) * 1.05,
+    });
+    const radius = shellRadius(
+      "second-degree",
+      `${pack.layoutSeed}:${targetId}:${characterId}:degree2`,
+    );
+    const candidate = {
+      ...scale(direction, radius),
+      layer: "second-degree",
+      degree: 2,
+      radius: round(radius),
+    } satisfies RelationshipSpacePoint;
+    const point = placeSeparated(candidate, placed, `${pack.layoutSeed}:${targetId}:${characterId}:separate`);
+    points.set(characterId, point);
+    placed.push(point);
+  });
+
+  const contextIds = pack.characters
+    .filter((character) => character.id !== targetId && (degrees.get(character.id) ?? Infinity) > 2)
+    .map((character) => character.id)
+    .sort();
+  contextIds.forEach((characterId) => {
+    const radius = shellRadius("context", `${pack.layoutSeed}:${targetId}:${characterId}:context`);
+    const direction = constrainContextDepth(contextualDirection(`${targetId}:${characterId}:context`));
+    const candidate = {
+      ...scale(direction, radius),
+      layer: "context",
+      degree: degrees.get(characterId) ?? null,
+      radius: round(radius),
+    } satisfies RelationshipSpacePoint;
+    const point = placeSeparated(candidate, placed, `${pack.layoutSeed}:${targetId}:${characterId}:separate`);
+    points.set(characterId, point);
+    placed.push(point);
+  });
 
   return { points, degrees, pathEdgeIds, targetId };
 }

@@ -65,7 +65,7 @@ describe("semantic relationship space", () => {
     expect(points).toHaveLength(romeo.characters.length);
     for (const point of points) {
       expect(Number.isFinite(point.x + point.y + point.z)).toBe(true);
-      expect(Math.hypot(point.x, point.y, point.z)).toBeLessThanOrEqual(12.5);
+      expect(Math.hypot(point.x, point.y, point.z)).toBeLessThanOrEqual(15.51);
     }
     for (let first = 0; first < points.length; first += 1) {
       for (let second = first + 1; second < points.length; second += 1) {
@@ -76,6 +76,42 @@ describe("semantic relationship space", () => {
             points[first].z - points[second].z,
           ),
         ).toBeGreaterThan(0.9);
+      }
+    }
+  });
+
+  it("places every official lesson in separated semantic shells", () => {
+    const shells = {
+      direct: { min: 6.8, max: 9.2 },
+      "second-degree": { min: 10.2, max: 13.2 },
+      context: { min: 13.5, max: 15.5 },
+    } as const;
+
+    for (const lesson of [romeo, revolution]) {
+      for (const target of lesson.characters) {
+        const layout = createRelationshipSpace(lesson, target.id);
+        const nonOrigin = [...layout.points.values()].filter(
+          (point) => point.layer !== "origin",
+        );
+
+        for (const point of nonOrigin) {
+          const shell = shells[point.layer];
+          expect(point.radius).toBeGreaterThanOrEqual(shell.min);
+          expect(point.radius).toBeLessThanOrEqual(shell.max);
+          expect(Math.abs(point.z)).toBeLessThan(15.5);
+        }
+
+        for (let first = 0; first < nonOrigin.length; first += 1) {
+          for (let second = first + 1; second < nonOrigin.length; second += 1) {
+            expect(
+              Math.hypot(
+                nonOrigin[first].x - nonOrigin[second].x,
+                nonOrigin[first].y - nonOrigin[second].y,
+                nonOrigin[first].z - nonOrigin[second].z,
+              ),
+            ).toBeGreaterThanOrEqual(2.2);
+          }
+        }
       }
     }
   });
