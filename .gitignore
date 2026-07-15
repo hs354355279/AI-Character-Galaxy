@@ -4,6 +4,7 @@ coverage/
 playwright-report/
 test-results/
 output/
+.worktrees/
 .env*
 !.env.example
 npm-debug.log*
