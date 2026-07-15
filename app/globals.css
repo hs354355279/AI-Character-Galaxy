@@ -658,7 +658,7 @@ button {
   min-height: 100svh;
   padding: 2rem 4vw;
   overflow-y: auto;
-  color: var(--space-ink);
+  color: var(--space-ink, #f3f1ea);
   background: #05070b;
 }
 

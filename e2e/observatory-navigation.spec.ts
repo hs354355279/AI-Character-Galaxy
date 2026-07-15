@@ -17,3 +17,22 @@ test("character deep links open the active observatory at the requested person",
   await expect(page).toHaveURL(/\/learn\/french-revolution\?focus=olympe-de-gouges$/);
   await expect(page.getByRole("heading", { name: "Olympe de Gouges", exact: true })).toBeVisible();
 });
+
+test("the global index keeps light text on its ink background from paper pages", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/characters");
+  await page.getByRole("button", { name: "Open navigation index" }).click();
+
+  const index = page.getByRole("dialog", { name: "Exhibition index" });
+  await expect(index).toBeVisible();
+  await expect(index).toHaveCSS("background-color", "rgb(5, 7, 11)");
+  await expect(index).toHaveCSS("color", "rgb(243, 241, 234)");
+  await expect(index.getByRole("link", { name: "Exhibition" })).toHaveCSS(
+    "color",
+    "rgb(243, 241, 234)",
+  );
+  await expect(index.getByRole("button", { name: /Close/ })).toHaveCSS(
+    "color",
+    "rgb(243, 241, 234)",
+  );
+});
