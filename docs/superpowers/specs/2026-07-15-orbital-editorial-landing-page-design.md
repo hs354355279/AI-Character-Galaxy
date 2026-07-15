@@ -92,9 +92,19 @@ Accent colors appear in procedural artwork and small status details, not in grad
 - Dividers and orbit lines may extend beyond the content grid to reinforce depth.
 - Whitespace acts as a deliberate pause between high-motion chapters.
 
-### 5.4 Procedural artwork
+### 5.4 Exhibition artwork
 
-Lesson visuals are original SVG/CSS compositions generated from stable lesson metadata: nodes, orbital ellipses, relationship lines, numbers, and lesson-specific accent colors. They do not depict historical figures as invented portraits.
+The primary exhibition plates are original generated images created specifically for this project. They are layered with lightweight SVG/CSS compositions generated from stable lesson metadata: nodes, orbital ellipses, relationship lines, numbers, and lesson-specific accent colors. They do not depict historical figures as invented portraits.
+
+The approved source assets are:
+
+| Asset | Dimensions | Intended use |
+| --- | --- | --- |
+| `public/images/landing/hero-orbital-exhibition.png` | 1672 × 941 | Hero background with copy-safe negative space on the left |
+| `public/images/landing/lesson-french-revolution.png` | 1122 × 1402 | French Revolution lesson exhibition plate |
+| `public/images/landing/lesson-romeo-and-juliet.png` | 1122 × 1402 | Romeo and Juliet lesson exhibition plate |
+
+The hero asset is loaded eagerly because it is visible above the fold. Lesson assets use `next/image` responsive sizing and remain lazy-loaded. All three images are decorative companions to equivalent readable content, so their rendered `alt` values are empty and their containing artwork layers are hidden from assistive technology.
 
 Decorative SVG elements are hidden from assistive technology and use `pointer-events: none` so they cannot obstruct lesson links.
 
@@ -223,6 +233,7 @@ components/home/
   LoadingScreen.tsx
   Hero.tsx
   SectionTitle.tsx
+  ParallaxImage.tsx
   OrbitArtwork.tsx
   HorizontalJourney.tsx
   LessonShowcase.tsx
@@ -299,6 +310,7 @@ No new API request is introduced for the landing page.
 - Keep the number of continuously floating elements small.
 - Avoid per-character splitting for long paragraphs.
 - Avoid WebGL, video backgrounds, remote font downloads, and stock image payloads on the landing page.
+- Render the three approved generated images through `next/image` with accurate `sizes`; only the hero uses `priority`.
 - Lazy-initialize below-the-fold scroll effects and kill all triggers on unmount or breakpoint change.
 - Do not animate box shadow, filter, layout dimensions, or blur every frame.
 - Preserve page content and navigation if JavaScript is unavailable.
