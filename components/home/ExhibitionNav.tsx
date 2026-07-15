@@ -1,7 +1,12 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
+import {
+  canAnimateLanding,
+  ScrollTrigger,
+  useGSAP,
+} from "@/animations/landingMotion";
 import { BrandMark } from "@/components/shared/BrandMark";
 
 const chapters = [
@@ -13,8 +18,26 @@ const chapters = [
 
 export function ExhibitionNav() {
   const [open, setOpen] = useState(false);
+  const reduceMotion = useReducedMotion();
+  const root = useRef<HTMLElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(
+    () => {
+      if (!canAnimateLanding() || !root.current) return;
+      const hero = document.querySelector<HTMLElement>(".editorial-hero");
+      if (!hero) return;
+
+      ScrollTrigger.create({
+        trigger: hero,
+        start: "bottom 96px",
+        end: "max",
+        toggleClass: { targets: root.current, className: "is-material" },
+      });
+    },
+    { scope: root },
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -55,7 +78,7 @@ export function ExhibitionNav() {
   }, [open]);
 
   return (
-    <nav className="exhibition-nav" aria-label="Primary navigation">
+    <nav ref={root} className="exhibition-nav" aria-label="Primary navigation">
       <BrandMark />
       <div className="exhibition-nav-actions">
         <a href="#official-lessons">Lessons</a>
@@ -76,9 +99,9 @@ export function ExhibitionNav() {
           role="dialog"
           aria-modal="true"
           aria-label="Exhibition index"
-          initial={{ clipPath: "inset(0 0 100% 0)" }}
+          initial={reduceMotion ? false : { clipPath: "inset(0 0 100% 0)" }}
           animate={{ clipPath: "inset(0 0 0% 0)" }}
-          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: reduceMotion ? 0 : 0.55, ease: [0.22, 1, 0.36, 1] }}
         >
           <button type="button" className="index-close" onClick={() => setOpen(false)}>
             Close
@@ -89,9 +112,9 @@ export function ExhibitionNav() {
                 href={href}
                 key={number}
                 onClick={() => setOpen(false)}
-                initial={{ opacity: 0, y: 30 }}
+                initial={reduceMotion ? false : { opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.08 + index * 0.06 }}
+                transition={{ delay: reduceMotion ? 0 : 0.08 + index * 0.06 }}
               >
                 <span>{number}</span>
                 <strong>{label}</strong>

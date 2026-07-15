@@ -7,11 +7,13 @@ import { Hero } from "./Hero";
 import { HorizontalJourney } from "./HorizontalJourney";
 import { LessonShowcase } from "./LessonShowcase";
 import { LoadingScreen } from "./LoadingScreen";
+import { SmoothScroll } from "./SmoothScroll";
 
 export function LandingExperience({ lessons }: { lessons: LandingLesson[] }) {
   return (
     <main id="top" className="home-page">
       <LoadingScreen />
+      <SmoothScroll />
       <ExhibitionNav />
       <Hero />
       <HorizontalJourney />

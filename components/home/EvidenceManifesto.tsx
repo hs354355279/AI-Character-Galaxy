@@ -12,8 +12,11 @@ export function EvidenceManifesto() {
         className="evidence-manifesto"
         aria-labelledby="evidence-title"
       >
-        <p className="landing-eyebrow">03 — Learning safeguards</p>
-        <h2 id="evidence-title">Evidence is part of the experience.</h2>
+        <SectionTitle
+          id="evidence-title"
+          label="03 — Learning safeguards"
+          title="Evidence is part of the experience."
+        />
         <div className="safeguard-list">
           {safeguards.map(([number, title, copy]) => (
             <div className="safeguard-row" key={number}>
@@ -32,3 +35,6 @@ export function EvidenceManifesto() {
     </>
   );
 }
+"use client";
+
+import { SectionTitle } from "./SectionTitle";

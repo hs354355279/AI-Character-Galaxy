@@ -17,14 +17,61 @@ const steps = [
 ];
 
 export function HorizontalJourney() {
+  const root = useRef<HTMLElement>(null);
+  const track = useRef<HTMLDivElement>(null);
+
+  useGSAP(
+    () => {
+      if (!canAnimateLanding() || !root.current || !track.current) return;
+
+      const media = gsap.matchMedia();
+      media.add(
+        "(min-width: 1024px) and (prefers-reduced-motion: no-preference)",
+        () => {
+          const distance = () =>
+            Math.max(0, track.current!.scrollWidth - window.innerWidth);
+
+          gsap.to(track.current, {
+            x: () => -distance(),
+            ease: "none",
+            scrollTrigger: {
+              trigger: root.current,
+              start: "top top",
+              end: () => `+=${distance() + window.innerHeight}`,
+              pin: true,
+              scrub: 0.8,
+              anticipatePin: 1,
+              invalidateOnRefresh: true,
+            },
+          });
+        },
+      );
+
+      const refreshFrame = window.requestAnimationFrame(() => ScrollTrigger.refresh());
+      return () => {
+        window.cancelAnimationFrame(refreshFrame);
+        media.revert();
+      };
+    },
+    { scope: root },
+  );
+
   return (
-    <section id="method" className="journey-section" aria-labelledby="journey-title">
+    <section
+      ref={root}
+      id="method"
+      className="journey-section"
+      aria-labelledby="journey-title"
+    >
       <div className="journey-intro">
-        <p className="landing-eyebrow">01 — Learning method</p>
-        <h2 id="journey-title">Read relationships in three movements.</h2>
+        <SectionTitle
+          id="journey-title"
+          label="01 — Learning method"
+          title="Read relationships in three movements."
+        />
       </div>
       <div className="journey-viewport">
-        <div className="journey-track">
+        <div ref={track} className="journey-track">
           {steps.map((step) => (
             <article className="journey-panel" key={step.number}>
               <span className="journey-number" aria-hidden="true">
@@ -40,3 +87,13 @@ export function HorizontalJourney() {
     </section>
   );
 }
+"use client";
+
+import { useRef } from "react";
+import {
+  canAnimateLanding,
+  gsap,
+  ScrollTrigger,
+  useGSAP,
+} from "@/animations/landingMotion";
+import { SectionTitle } from "./SectionTitle";
