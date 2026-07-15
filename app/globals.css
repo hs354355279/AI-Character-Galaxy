@@ -3905,9 +3905,17 @@ button {
   }
 }
 
-/* Keep active-observatory composition after legacy workspace fallbacks. */
+/* Editorial observatory: the final source of truth for active lesson composition. */
 .learning-workspace {
-  padding: 6rem 0.7rem 0.7rem;
+  --observatory-paper: #eeece5;
+  --observatory-paper-raised: #e2ded3;
+  --observatory-ink: #11110f;
+  height: 100svh;
+  min-height: 0;
+  overflow: hidden;
+  padding: 5.65rem 0 0;
+  color: var(--observatory-ink);
+  background: var(--observatory-paper);
 }
 
 .learning-workspace .exhibition-header {
@@ -3920,35 +3928,328 @@ button {
   grid-template-columns: minmax(10rem, 0.8fr) auto minmax(26rem, 1.4fr);
 }
 
-.learning-workspace .workspace-grid {
-  min-height: calc(100svh - 7.8rem);
-  grid-template-columns: minmax(260px, 0.7fr) minmax(540px, 2.2fr) minmax(290px, 0.78fr);
-  gap: 0.65rem;
-  padding: 0;
+.learning-workspace .view-toggle {
+  border-color: rgba(17, 17, 15, 0.18);
+  background: rgba(17, 17, 15, 0.04);
 }
 
-.learning-workspace .workspace-panel,
-.learning-workspace .galaxy-viewport {
-  border-radius: 0.4rem;
+.learning-workspace .view-toggle button,
+.learning-workspace .header-action {
+  color: rgba(17, 17, 15, 0.68);
 }
 
-.learning-workspace .workspace-panel {
-  top: 7.8rem;
-  height: calc(100svh - 8.5rem);
-  padding: 1.45rem;
-  border: 1px solid rgba(243, 241, 234, 0.13);
-  background: rgba(12, 17, 30, 0.92);
+.learning-workspace .view-toggle button[aria-pressed="true"] {
+  color: #f3f1ea;
+  background: var(--observatory-ink);
   box-shadow: none;
-  backdrop-filter: blur(20px);
 }
 
-.learning-workspace .galaxy-viewport {
+.learning-workspace .header-action:hover {
+  color: var(--observatory-ink);
+  background: rgba(17, 17, 15, 0.07);
+}
+
+.observatory-shell {
+  height: calc(100svh - 5.65rem);
   min-height: 0;
-  border-color: rgba(243, 241, 234, 0.13);
-  background: #080c16;
+  display: grid;
+  grid-template-columns: clamp(15rem, 17vw, 17rem) minmax(0, 1fr);
+  overflow: hidden;
+}
+
+.mission-panel {
+  position: relative;
+  z-index: 3;
+  min-height: 0;
+  overflow: auto;
+  padding: clamp(1.4rem, 2.2vw, 2.2rem) clamp(1.15rem, 1.8vw, 1.8rem);
+  color: var(--observatory-ink);
+  border-right: 1px solid rgba(17, 17, 15, 0.18);
+  background: var(--observatory-paper);
+  overscroll-behavior: contain;
+  animation: observatory-panel-in 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.observatory-stage {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  color: #f3f1ea;
+  background: #070b14;
+}
+
+.observatory-caption {
+  position: absolute;
+  z-index: 8;
+  top: 0;
+  right: 0;
+  left: 0;
+  min-height: 3.25rem;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid rgba(243, 241, 234, 0.14);
+  background: rgba(7, 11, 20, 0.94);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.observatory-caption span,
+.observatory-caption i {
+  color: rgba(243, 241, 234, 0.54);
+  font-style: normal;
+}
+
+.observatory-caption strong {
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.learning-workspace .galaxy-viewport,
+.learning-workspace .galaxy-canvas {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+}
+
+.learning-workspace .galaxy-canvas {
+  overscroll-behavior: none;
+  touch-action: none;
+}
+
+.learning-workspace .galaxy-viewport > .relationship-list-view {
+  height: 100%;
+  overflow: auto;
+  padding: 5rem 25rem 9rem 2rem;
+  overscroll-behavior: contain;
+}
+
+.learning-workspace .webgl-status {
+  position: absolute;
+  z-index: 11;
+  top: 4.15rem;
+  left: 1rem;
+  width: auto;
+  max-width: calc(100% - 26rem);
+  margin: 0;
+  border-radius: 0;
+  background: rgba(7, 11, 20, 0.94);
+}
+
+.evidence-panel {
+  position: absolute;
+  z-index: 9;
+  top: 4.25rem;
+  right: 1rem;
+  width: clamp(20rem, 23vw, 23rem);
+  max-height: calc(100% - 12.1rem);
+  overflow: auto;
+  padding: 1.3rem;
+  color: var(--observatory-ink);
+  border: 1px solid rgba(17, 17, 15, 0.2);
+  background: rgba(238, 236, 229, 0.97);
+  box-shadow: -1.2rem 1.2rem 3rem rgba(0, 0, 0, 0.18);
+  overscroll-behavior: contain;
+  animation: observatory-panel-in 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.evidence-content,
+.evidence-empty {
+  animation: evidence-sheet-in 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.observatory-filmstrip {
+  position: absolute;
+  z-index: 10;
+  right: 1rem;
+  bottom: 1rem;
+  left: 1rem;
+}
+
+.learning-workspace .character-rail {
+  min-width: 0;
+  padding: 0.7rem;
+  color: #f3f1ea;
+  border: 1px solid rgba(243, 241, 234, 0.18);
+  background: rgba(7, 11, 20, 0.96);
+}
+
+.learning-workspace .character-rail-track button {
+  min-width: 14rem;
+  border-radius: 0;
+}
+
+.learning-workspace .relationship-axes-legend {
+  bottom: 8.5rem;
+  border-radius: 0;
+  background: rgba(7, 11, 20, 0.92);
+  backdrop-filter: none;
+}
+
+.mission-content .eyebrow,
+.mission-progress-row > span,
+.evidence-content .eyebrow {
+  color: rgba(17, 17, 15, 0.58);
+}
+
+.mission-content h2 {
+  max-width: 12ch;
+  color: var(--observatory-ink);
+  font-size: clamp(1.55rem, 2.2vw, 1.8rem);
+}
+
+.mission-content > p,
+.evidence-content > p,
+.evidence-empty p {
+  color: rgba(17, 17, 15, 0.68);
+}
+
+.mission-progress-track {
+  height: auto;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.3rem;
+  margin: 1rem 0 2rem;
+  padding: 0;
+  overflow: visible;
+  border-radius: 0;
+  background: transparent;
+  list-style: none;
+}
+
+.mission-progress-track li {
+  padding-top: 0.45rem;
+  color: rgba(17, 17, 15, 0.45);
+  border-top: 1px solid rgba(17, 17, 15, 0.24);
+  font-size: 0.62rem;
+}
+
+.mission-progress-track li[data-state="complete"]::after {
+  content: "✓";
+  margin-left: 0.2rem;
+}
+
+.mission-progress-track li[data-state="current"] {
+  color: var(--observatory-ink);
+  border-color: var(--observatory-ink);
+  font-weight: 800;
+}
+
+.mission-progress-track li > span {
+  display: inline;
+  height: auto;
+  border-radius: 0;
+  background: transparent;
+}
+
+.mission-response,
+.evidence-content > strong {
+  color: var(--observatory-ink);
+}
+
+.mission-response textarea {
+  color: var(--observatory-ink);
+  border-color: rgba(17, 17, 15, 0.24);
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.42);
+}
+
+.mission-actions .primary-action {
+  color: #f3f1ea;
+  border-color: var(--observatory-ink);
+  border-radius: 999px;
+  background: var(--observatory-ink);
+}
+
+.mission-actions .secondary-action {
+  color: var(--observatory-ink);
+  border-color: rgba(17, 17, 15, 0.28);
+  border-radius: 999px;
+  background: transparent;
+}
+
+.mission-hint,
+.mission-feedback,
+.evidence-callout,
+.dispute-note,
+.evidence-panel .ai-insight {
+  color: var(--observatory-ink);
+  border-color: rgba(17, 17, 15, 0.2);
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.mission-hint p,
+.evidence-callout p,
+.dispute-note p,
+.evidence-panel .ai-insight-result p,
+.evidence-panel .ai-insight-result small,
+.evidence-panel .ai-status {
+  color: rgba(17, 17, 15, 0.68);
+}
+
+.evidence-content h2,
+.evidence-empty h2 {
+  color: var(--observatory-ink);
+  font-size: clamp(1.4rem, 2vw, 1.65rem);
+}
+
+.evidence-content > a,
+.evidence-panel .ai-insight-result strong {
+  color: var(--observatory-ink);
+}
+
+.evidence-badge,
+.evidence-panel .tag-list span,
+.evidence-panel .ai-action,
+.evidence-panel .ai-source-label {
+  color: var(--observatory-ink);
+  border-color: rgba(17, 17, 15, 0.24);
+  background: transparent;
+}
+
+.evidence-empty {
+  min-height: 8rem;
+  place-content: start;
+  text-align: left;
+}
+
+.evidence-empty > span {
+  color: var(--observatory-ink);
+  font-size: 1.2rem;
+}
+
+.learning-workspace :where(button, a, summary, textarea):focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+@keyframes observatory-panel-in {
+  from { opacity: 0; transform: translate3d(0, 12px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes evidence-sheet-in {
+  from { opacity: 0; transform: translate3d(0, 8px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 
 @media (max-width: 1180px) {
+  .learning-workspace {
+    height: auto;
+    min-height: 100svh;
+    overflow: visible;
+  }
+
   .learning-workspace .exhibition-destinations {
     display: none;
   }
@@ -3957,22 +4258,66 @@ button {
     grid-template-columns: minmax(10rem, 1fr) minmax(0, 1.6fr);
   }
 
-  .learning-workspace .workspace-grid {
-    grid-template-columns: minmax(240px, 0.7fr) minmax(480px, 1.8fr);
+  .observatory-shell {
+    height: auto;
+    min-height: 0;
+    grid-template-columns: 1fr;
+    overflow: visible;
   }
 
-  .learning-workspace .evidence-panel {
-    position: static;
-    grid-column: 1 / -1;
-    width: auto;
-    height: auto;
+  .mission-panel {
     max-height: none;
+    border-right: 0;
+    border-bottom: 1px solid rgba(17, 17, 15, 0.18);
+  }
+
+  .observatory-stage {
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .observatory-caption {
+    position: relative;
+  }
+
+  .learning-workspace .galaxy-viewport {
+    height: clamp(38rem, 65svh, 50rem);
+  }
+
+  .learning-workspace .galaxy-viewport > .relationship-list-view {
+    padding: 2rem;
+  }
+
+  .learning-workspace .webgl-status {
+    position: relative;
+    top: auto;
+    left: auto;
+    max-width: none;
+    margin: 1rem;
+  }
+
+  .evidence-panel {
+    position: relative;
+    inset: auto;
+    width: auto;
+    max-height: none;
+    margin: 1rem;
+  }
+
+  .observatory-filmstrip {
+    position: relative;
+    inset: auto;
+    margin: 1rem;
+  }
+
+  .learning-workspace .relationship-axes-legend {
+    bottom: 1rem;
   }
 }
 
 @media (max-width: 800px) {
   .learning-workspace {
-    padding: 5.4rem 0.4rem 0.4rem;
+    padding-top: 5.2rem;
   }
 
   .learning-workspace .exhibition-header {
@@ -3983,8 +4328,7 @@ button {
 
   .learning-workspace .lesson-switcher,
   .learning-workspace .header-action,
-  .learning-workspace .exhibition-index-trigger,
-  .observatory-titlebar i {
+  .learning-workspace .exhibition-index-trigger {
     display: none;
   }
 
@@ -3993,60 +4337,53 @@ button {
     padding: 0.45rem 0.65rem;
   }
 
-  .learning-workspace .workspace-grid {
+  .mission-panel {
+    padding: 1.5rem 1rem 2rem;
+  }
+
+  .observatory-stage {
+    overflow: visible;
+  }
+
+  .observatory-caption {
     grid-template-columns: 1fr;
+    gap: 0.25rem;
   }
 
-  .learning-workspace .workspace-panel {
-    position: static;
-    height: auto;
+  .observatory-caption strong {
+    text-align: left;
+    white-space: normal;
   }
 
-  .learning-workspace .evidence-panel {
-    grid-column: auto;
+  .observatory-caption i {
+    display: none;
+  }
+
+  .learning-workspace .galaxy-viewport {
+    height: 34rem;
+  }
+
+  .evidence-panel,
+  .observatory-filmstrip {
+    margin: 0.6rem;
+  }
+
+  .learning-workspace .character-rail-track button {
+    min-width: 12.5rem;
+  }
+
+  .learning-workspace .galaxy-node-label {
+    min-width: 10.5rem;
   }
 }
 
-/* Desktop observatory is one bounded viewport; smaller screens keep document flow. */
-@media (min-width: 1181px) {
-  .learning-workspace {
-    height: 100svh;
-    min-height: 0;
-    overflow: hidden;
-  }
-
-  .learning-workspace .workspace-grid {
-    height: calc(100svh - 7.8rem);
-    min-height: 0;
-    overflow: hidden;
-  }
-
-  .learning-workspace .observatory-stage {
-    height: 100%;
-    min-height: 0;
-    grid-template-rows: minmax(0, 1fr) auto;
-    overflow: hidden;
-  }
-
-  .learning-workspace .workspace-panel,
-  .learning-workspace .galaxy-viewport {
-    min-height: 0;
-    height: 100%;
-  }
-
-  .learning-workspace .galaxy-viewport {
-    overflow: hidden;
-  }
-
-  .learning-workspace .workspace-panel {
-    position: relative;
-    top: auto;
-    overscroll-behavior: contain;
-  }
-
-  .learning-workspace .galaxy-canvas {
-    min-height: 0;
-    overscroll-behavior: none;
-    touch-action: none;
+@media (prefers-reduced-motion: reduce) {
+  .mission-panel,
+  .evidence-panel,
+  .evidence-content,
+  .evidence-empty,
+  .character-rail-track button {
+    transition: none;
+    animation: none;
   }
 }

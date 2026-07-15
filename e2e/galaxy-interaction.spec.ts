@@ -102,3 +102,25 @@ test("a selected character becomes the origin of a genuinely three-dimensional s
   await expect(romeo).not.toHaveAttribute("data-space-origin", "true");
   await expect.poll(async () => Math.abs(Number(await juliet.getAttribute("data-world-z")))).toBeLessThan(0.1);
 });
+
+test("the editorial observatory uses paper guidance around a dominant ink stage", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/learn/french-revolution?focus=robespierre");
+
+  await expect(page.locator(".exhibition-header--paper")).toBeVisible();
+  await expect(page.getByRole("complementary", { name: "Current mission" })).toHaveCSS(
+    "position",
+    "relative",
+  );
+  await expect(page.getByRole("complementary", { name: "Evidence sheet" })).toHaveCSS(
+    "position",
+    "absolute",
+  );
+
+  const proportions = await page.evaluate(() => {
+    const shell = document.querySelector<HTMLElement>(".observatory-shell")!;
+    const stage = document.querySelector<HTMLElement>(".observatory-stage")!;
+    return { shell: shell.clientWidth, stage: stage.clientWidth };
+  });
+  expect(proportions.stage / proportions.shell).toBeGreaterThan(0.7);
+});
