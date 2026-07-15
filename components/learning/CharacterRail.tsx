@@ -16,9 +16,9 @@ export function CharacterRail({
   const groupById = new Map(groups?.map((group) => [group.id, group]));
 
   return (
-    <nav className="character-rail" aria-label="Character selection">
+    <div className="character-rail" role="group" aria-label="Character selection">
       <div className="character-rail-heading">
-        <span>People index</span>
+        <span>People in this constellation</span>
         <small>{characters.length} subjects</small>
       </div>
       <div className="character-rail-track">
@@ -42,6 +42,6 @@ export function CharacterRail({
           );
         })}
       </div>
-    </nav>
+    </div>
   );
 }

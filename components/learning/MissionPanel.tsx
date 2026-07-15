@@ -37,9 +37,13 @@ export function MissionPanel({
         <p className="eyebrow">Mission {position} of {total}</p>
         <span>{mission.type.replaceAll("_", " ")}</span>
       </div>
-      <div className="mission-progress-track" aria-label={`${position} of ${total} missions`}>
-        <span style={{ width: `${((position - 1) / total) * 100}%` }} />
-      </div>
+      <ol className="mission-progress-track" aria-label={`${position} of ${total} missions`}>
+        {Array.from({ length: total }, (_, index) => {
+          const step = index + 1;
+          const state = step < position ? "complete" : step === position ? "current" : "upcoming";
+          return <li key={step} data-state={state}><span>{String(step).padStart(2, "0")}</span></li>;
+        })}
+      </ol>
       <h2>{mission.title}</h2>
       <p>{mission.prompt}</p>
       {needsResponse && (

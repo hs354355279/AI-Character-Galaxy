@@ -17,7 +17,7 @@ export function EvidencePanel({
     const from = lesson.characters.find((item) => item.id === relationship.fromCharacterId)!;
     const to = lesson.characters.find((item) => item.id === relationship.toCharacterId)!;
     return (
-      <div className="evidence-content">
+      <div className="evidence-content" data-evidence-state="relationship">
         <p className="eyebrow">Relationship evidence</p>
         <h2>{from.name} {relationship.direction === "directed" ? "→" : "↔"} {to.name}</h2>
         <span className="evidence-badge">{relationship.type.replaceAll("-", " ")}</span>
@@ -33,7 +33,7 @@ export function EvidencePanel({
   if (character) {
     const group = lesson.groups.find((item) => item.id === character.groupId)!;
     return (
-      <div className="evidence-content">
+      <div className="evidence-content" data-evidence-state="character">
         <p className="eyebrow">Character</p>
         <h2>{character.name}</h2>
         <span className="evidence-badge">{group.symbol} · {group.name}</span>
@@ -47,7 +47,7 @@ export function EvidencePanel({
   }
 
   return (
-    <div className="evidence-empty">
+    <div className="evidence-empty" data-evidence-state="empty">
       <span aria-hidden="true">✦</span>
       <h2>Explore the evidence</h2>
       <p>Select a person or relationship. Required facts are always available here and in the 2D list.</p>

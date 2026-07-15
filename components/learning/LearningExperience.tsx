@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion, useReducedMotion } from "motion/react";
+import { useReducedMotion } from "motion/react";
 import { useEffect, useState } from "react";
 import { RelationshipListView } from "@/components/accessibility/RelationshipListView";
 import { detectWebGL } from "@/components/accessibility/WebGLBoundary";
@@ -13,6 +13,7 @@ import { EvidencePanel } from "@/components/learning/EvidencePanel";
 import { LearningSummary } from "@/components/learning/LearningSummary";
 import { LessonIntroduction } from "@/components/learning/LessonIntroduction";
 import { MissionPanel } from "@/components/learning/MissionPanel";
+import { ObservatoryShell } from "@/components/learning/ObservatoryShell";
 import { evaluateMission, type MissionEvaluation } from "@/lib/missions/evaluate";
 import { createLandingLesson } from "@/lib/landing/lesson-view-model";
 import { getAllLessonPacks } from "@/lib/lessons/repository";
@@ -211,7 +212,7 @@ export function LearningExperience({
       <ExhibitionHeader
         lessons={lessons}
         currentLessonId={lesson.id}
-        theme="space"
+        theme="paper"
         indexLabel="Open observatory navigation"
         actions={(
           <div className="workspace-actions">
@@ -224,12 +225,6 @@ export function LearningExperience({
           </div>
         )}
       />
-      <div className="observatory-titlebar">
-        <span>{lesson.kind}</span>
-        <strong>{lesson.title}</strong>
-        <i>{lesson.characters.length} people · {lesson.relationships.length} relations</i>
-      </div>
-      {!available && <div className="webgl-status" role="status">3D is unavailable on this device. The complete lesson is open in the 2D relationship list.</div>}
       {explorationFinished ? (
         <section className="missions-complete glass-material">
           <p className="eyebrow">Exploration complete</p>
@@ -238,34 +233,64 @@ export function LearningExperience({
           <button className="primary-action pressable" type="button" onClick={() => setPhase("assessment")}>Begin comprehension check →</button>
         </section>
       ) : (
-        <div className="workspace-grid">
-          <motion.aside className="workspace-panel mission-panel glass-material" initial={reduceMotion ? false : { x: -18 }} animate={{ x: 0 }} transition={{ type: "spring", bounce: 0, duration: 0.38 }}>
-            <MissionPanel mission={mission} position={missionIndex + 1} total={lesson.missions.length} hint={visibleHint} hintUsed={session.usedHintIds.includes(hintId)} writtenResponse={writtenResponse} evaluation={evaluation} onHint={revealHint} onResponseChange={setWrittenResponse} onCheck={checkMission} onContinue={continueMission} />
-          </motion.aside>
-          <div className="observatory-stage">
-            <section className="galaxy-viewport">
-              {view === "3d" && available ? (
-                <GalaxyScene lesson={lesson} selectedCharacterId={focusedCharacterId} selectedRelationshipIds={selectedRelationshipIds} highlightedRelationshipIds={mission.relevantRelationshipIds} reduceMotion={reduceMotion} onSelectCharacter={selectCharacter} onSelectRelationship={selectRelationship} />
-              ) : (
-                <RelationshipListView lesson={lesson} selectedCharacterIds={selectedCharacterIds} selectedRelationshipIds={selectedRelationshipIds} onSelectCharacter={selectCharacter} onSelectRelationship={selectRelationship} />
-              )}
-            </section>
-            <CharacterRail
-              characters={lesson.characters}
-              groups={lesson.groups}
-              selectedCharacterId={focusedCharacterId}
-              onSelect={selectCharacter}
+        <ObservatoryShell
+          lesson={lesson}
+          status={!available ? (
+            <div className="webgl-status" role="status">
+              3D is unavailable on this device. The complete lesson is open in the 2D relationship list.
+            </div>
+          ) : undefined}
+          mission={(
+            <MissionPanel
+              mission={mission}
+              position={missionIndex + 1}
+              total={lesson.missions.length}
+              hint={visibleHint}
+              hintUsed={session.usedHintIds.includes(hintId)}
+              writtenResponse={writtenResponse}
+              evaluation={evaluation}
+              onHint={revealHint}
+              onResponseChange={setWrittenResponse}
+              onCheck={checkMission}
+              onContinue={continueMission}
             />
-          </div>
-          <motion.aside className="workspace-panel evidence-panel glass-material" initial={reduceMotion ? false : { x: 18 }} animate={{ x: 0 }} transition={{ type: "spring", bounce: 0, duration: 0.38 }}>
+          )}
+          galaxy={view === "3d" && available ? (
+            <GalaxyScene
+              lesson={lesson}
+              selectedCharacterId={focusedCharacterId}
+              selectedRelationshipIds={selectedRelationshipIds}
+              highlightedRelationshipIds={mission.relevantRelationshipIds}
+              reduceMotion={reduceMotion}
+              onSelectCharacter={selectCharacter}
+              onSelectRelationship={selectRelationship}
+            />
+          ) : (
+            <RelationshipListView
+              lesson={lesson}
+              selectedCharacterIds={selectedCharacterIds}
+              selectedRelationshipIds={selectedRelationshipIds}
+              onSelectCharacter={selectCharacter}
+              onSelectRelationship={selectRelationship}
+            />
+          )}
+          evidence={(
             <EvidencePanel
               lesson={lesson}
               character={focusedCharacter}
               relationship={focusedRelationship}
               sessionId={`${lesson.id}:${session.startedAt}`}
             />
-          </motion.aside>
-        </div>
+          )}
+          characterIndex={(
+            <CharacterRail
+              characters={lesson.characters}
+              groups={lesson.groups}
+              selectedCharacterId={focusedCharacterId}
+              onSelect={selectCharacter}
+            />
+          )}
+        />
       )}
     </main>
   );

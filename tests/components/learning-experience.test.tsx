@@ -80,7 +80,7 @@ describe("LearningExperience", () => {
       />,
     );
 
-    expect(screen.getByRole("navigation", { name: "Character selection" })).toBeVisible();
+    expect(screen.getByRole("navigation", { name: "People filmstrip" })).toBeVisible();
     expect(screen.getByRole("button", { name: "Select Olympe de Gouges" })).toBeVisible();
   });
 
@@ -95,5 +95,24 @@ describe("LearningExperience", () => {
     );
 
     expect(screen.getByRole("heading", { name: "Olympe de Gouges" })).toBeVisible();
+  });
+
+  it("renders the approved editorial observatory without changing learning controls", () => {
+    const active = createLearningSession(lesson.id, "2026-07-14T00:00:00.000Z");
+    const { container } = render(
+      <LearningExperience
+        lesson={lesson}
+        initialSession={active}
+        initialView="2d"
+        webglAvailable
+      />,
+    );
+
+    expect(screen.getByRole("complementary", { name: "Current mission" })).toBeVisible();
+    expect(screen.getByRole("region", { name: "Relationship observatory" })).toBeVisible();
+    expect(screen.getByRole("complementary", { name: "Evidence sheet" })).toBeVisible();
+    expect(screen.getByRole("navigation", { name: "People filmstrip" })).toBeVisible();
+    expect(container.querySelector(".exhibition-header--paper")).not.toBeNull();
+    expect(screen.getByRole("button", { name: "Check mission" })).toBeVisible();
   });
 });
