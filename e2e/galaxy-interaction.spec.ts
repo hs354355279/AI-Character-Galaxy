@@ -9,6 +9,7 @@ test("a planet remains selectable when a relationship line crosses in front of i
   await startFrenchRevolution(page);
 
   const label = page.locator('[data-character-label="Olympe de Gouges"]');
+  await expect(label).toHaveAttribute("data-projection-ready", "true");
   const canvasBox = await page.locator(".galaxy-canvas").boundingBox();
   const planet = await label.evaluate((element) => ({
     x: Number((element as HTMLElement).dataset.planetX),

@@ -117,6 +117,7 @@ function GalaxyLabelProjector({
       planetProjected.set(label.point.x, label.point.y, label.point.z).project(camera);
       element.dataset.planetX = String((planetProjected.x * 0.5 + 0.5) * size.width);
       element.dataset.planetY = String((-planetProjected.y * 0.5 + 0.5) * size.height);
+      element.dataset.projectionReady = "true";
       world.set(label.point.x, label.point.y + label.offsetY, label.point.z);
       pointDirection.copy(world).sub(camera.position);
       projected.copy(world).project(camera);
