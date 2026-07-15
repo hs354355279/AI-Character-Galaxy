@@ -57,15 +57,18 @@ export function LearningExperience({
     initialSession || validInitialFocus ? "explore" : "intro",
   );
   useEffect(() => {
-    if (webglAvailable !== undefined) {
-      setAvailable(webglAvailable);
-      if (!webglAvailable) setView("2d");
-      return;
-    }
+    if (webglAvailable !== undefined) return;
 
-    const detected = detectWebGL();
-    setAvailable(detected);
-    if (detected && initialView === "3d") setView("3d");
+    let active = true;
+    queueMicrotask(() => {
+      if (!active) return;
+      const detected = detectWebGL();
+      setAvailable(detected);
+      if (detected && initialView === "3d") setView("3d");
+    });
+    return () => {
+      active = false;
+    };
   }, [initialView, webglAvailable]);
   const [session, setSession] = useState<LearningSession>(() => {
     if (initialSession) return initialSession;
