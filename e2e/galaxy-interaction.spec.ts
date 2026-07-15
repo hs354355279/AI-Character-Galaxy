@@ -124,3 +124,70 @@ test("the editorial observatory uses paper guidance around a dominant ink stage"
   });
   expect(proportions.stage / proportions.shell).toBeGreaterThan(0.7);
 });
+
+test("desktop labels remain crisp, readable, and separated while zooming", async ({ page }) => {
+  for (const viewport of [{ width: 1440, height: 900 }, { width: 2048, height: 1024 }]) {
+    await page.setViewportSize(viewport);
+    await page.goto("/learn/french-revolution?focus=robespierre");
+    const labels = page.locator("[data-character-label]");
+    await expect(labels.first()).toHaveAttribute("data-projection-ready", "true");
+
+    const state = await labels.evaluateAll((nodes) => nodes.map((node) => {
+      const element = node as HTMLElement;
+      return {
+        fontSize: Number.parseFloat(getComputedStyle(element.querySelector("strong")!).fontSize),
+        transform: element.style.transform,
+        x: Number(element.dataset.planetX),
+        y: Number(element.dataset.planetY),
+      };
+    }));
+
+    expect(state.every((item) => item.fontSize >= 13)).toBe(true);
+    expect(state.every((item) => !/scale/i.test(item.transform))).toBe(true);
+    const projectedDistances = state.flatMap((first, firstIndex) =>
+      state.slice(firstIndex + 1).map((second) => Math.hypot(first.x - second.x, first.y - second.y)),
+    );
+    expect(Math.min(...projectedDistances)).toBeGreaterThan(24);
+
+    await page.locator(".galaxy-canvas").hover();
+    await page.mouse.wheel(0, -500);
+    await page.waitForTimeout(250);
+    expect(await labels.evaluateAll((nodes) => nodes.every(
+      (node) => !/scale/i.test((node as HTMLElement).style.transform),
+    ))).toBe(true);
+    expect(await page.evaluate(
+      () => document.documentElement.scrollHeight - document.documentElement.clientHeight,
+    )).toBeLessThanOrEqual(1);
+  }
+});
+
+test("tablet observatory keeps every surface inside the document width", async ({ page }) => {
+  await page.setViewportSize({ width: 1024, height: 900 });
+  await page.goto("/learn/french-revolution?focus=olympe-de-gouges");
+  await expect(page.locator(".galaxy-viewport")).toBeVisible();
+
+  const layout = await page.evaluate(() => ({
+    overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    galaxyWidth: document.querySelector<HTMLElement>(".galaxy-viewport")!.clientWidth,
+    documentWidth: document.documentElement.clientWidth,
+  }));
+
+  expect(layout.overflow).toBeLessThanOrEqual(1);
+  expect(layout.galaxyWidth).toBeLessThanOrEqual(layout.documentWidth);
+});
+
+test("mobile opens the complete 2D relationship view without document overflow", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/learn/french-revolution?focus=olympe-de-gouges");
+  await page.waitForTimeout(300);
+
+  await expect(page.getByLabel("2D relationship list")).toBeVisible();
+  await expect(page.getByRole("button", { name: "2D list", exact: true })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await expect(page.locator(".galaxy-canvas")).toHaveCount(0);
+  expect(await page.evaluate(
+    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+  )).toBeLessThanOrEqual(1);
+});

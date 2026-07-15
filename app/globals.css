@@ -3974,6 +3974,7 @@ button {
   position: relative;
   min-width: 0;
   min-height: 0;
+  display: block;
   overflow: hidden;
   color: #f3f1ea;
   background: #070b14;

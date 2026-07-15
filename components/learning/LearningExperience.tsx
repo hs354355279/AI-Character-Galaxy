@@ -63,9 +63,14 @@ export function LearningExperience({
     let active = true;
     queueMicrotask(() => {
       if (!active) return;
+      const compact = window.matchMedia("(max-width: 800px)").matches;
       const detected = detectWebGL();
       setAvailable(detected);
-      if (detected && initialView === "3d") setView("3d");
+      if (compact) {
+        setView("2d");
+      } else if (detected && initialView === "3d") {
+        setView("3d");
+      }
     });
     return () => {
       active = false;
