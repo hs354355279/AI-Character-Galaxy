@@ -5,6 +5,12 @@ import {
   scoreRelationship,
 } from "@/lib/layout/relationship-space";
 import { getLessonPack } from "@/lib/lessons/repository";
+import {
+  createEmptyExpansionState,
+  createRuntimeRelationshipGraph,
+  mergeExpansionBatch,
+} from "@/lib/network-expansion/runtime-graph";
+import type { NetworkExpansionBatch } from "@/lib/network-expansion/schemas";
 
 const romeo = getLessonPack("romeo-and-juliet")!;
 const revolution = getLessonPack("french-revolution")!;
@@ -82,6 +88,7 @@ describe("semantic relationship space", () => {
 
   it("places every official lesson in separated semantic shells", () => {
     const shells = {
+      origin: { min: 0, max: 0 },
       direct: { min: 6.8, max: 9.2 },
       "second-degree": { min: 10.2, max: 13.2 },
       context: { min: 13.5, max: 15.5 },
@@ -125,5 +132,57 @@ describe("semantic relationship space", () => {
     expect(classifyRelationshipProminence(romance, layout)).toBe("origin");
     expect(classifyRelationshipProminence(friendship, layout)).toBe("second-degree");
     expect(classifyRelationshipProminence(turningPoint, layout)).toBe("context");
+  });
+
+  it("places a newly expanded person deterministically on the focus person's direct shell", () => {
+    const batch: NetworkExpansionBatch = {
+      focusCharacterId: "olympe-de-gouges",
+      characters: [{
+        id: "ai-mary-wollstonecraft",
+        name: "Mary Wollstonecraft",
+        aliases: [],
+        role: "Writer and political philosopher",
+        summary: "Mary Wollstonecraft argued that women deserved education and recognition as rational citizens.",
+        groupId: "ai-expanded-network",
+        importance: 3,
+        sourceRefIds: ["source-wollstonecraft"],
+        learningTags: ["rights"],
+        provenance: "ai-expanded",
+        citationIds: ["source-wollstonecraft"],
+      }],
+      relationships: [{
+        id: "ai-olympe-de-gouges-ai-mary-wollstonecraft-influence",
+        fromCharacterId: "olympe-de-gouges",
+        toCharacterId: "ai-mary-wollstonecraft",
+        type: "influence",
+        direction: "undirected",
+        strength: 4,
+        summary: "Their published arguments joined a wider debate about women's political rights.",
+        evidenceSummary: "Published texts and scholarship document their related interventions in revolutionary rights debates.",
+        sourceRefIds: ["source-wollstonecraft"],
+        confidence: 0.86,
+        isDisputed: false,
+        learningTags: ["rights"],
+        provenance: "ai-expanded",
+        citationIds: ["source-wollstonecraft"],
+      }],
+      citations: [{ id: "source-wollstonecraft", title: "Biography", url: "https://example.org/wollstonecraft" }],
+      generatedAt: "2026-07-16T00:00:00.000Z",
+    };
+    const state = mergeExpansionBatch(
+      revolution,
+      createEmptyExpansionState(revolution.id),
+      batch,
+    );
+    const graph = createRuntimeRelationshipGraph(revolution, state);
+
+    const first = createRelationshipSpace(graph, "olympe-de-gouges");
+    const second = createRelationshipSpace(graph, "olympe-de-gouges");
+
+    expect(first.points.get("olympe-de-gouges")).toMatchObject({ x: 0, y: 0, z: 0 });
+    expect(first.points.get("ai-mary-wollstonecraft")).toMatchObject({ layer: "direct", degree: 1 });
+    expect(first.points.get("ai-mary-wollstonecraft")).toEqual(
+      second.points.get("ai-mary-wollstonecraft"),
+    );
   });
 });

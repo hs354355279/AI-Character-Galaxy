@@ -1,5 +1,11 @@
 import type { GalaxyPoint } from "@/lib/layout/galaxy-layout";
-import type { LessonPack, RelationshipEdge } from "@/lib/lessons/schema";
+import type { CharacterNode, RelationshipEdge } from "@/lib/lessons/schema";
+import type { RelationshipGraph } from "@/lib/network-expansion/schemas";
+
+type RelationshipSpaceInput = Pick<RelationshipGraph, "layoutSeed"> & {
+  characters: ReadonlyArray<CharacterNode>;
+  relationships: ReadonlyArray<RelationshipEdge>;
+};
 
 export type RelationshipLayer = "origin" | "direct" | "second-degree" | "context";
 export type RelationshipProminence = "origin" | "second-degree" | "context";
@@ -134,7 +140,7 @@ function scale(point: GalaxyPoint, radius: number): GalaxyPoint {
   };
 }
 
-function relationshipEdgesFor(pack: LessonPack, characterId: string): RelationshipEdge[] {
+function relationshipEdgesFor(pack: RelationshipSpaceInput, characterId: string): RelationshipEdge[] {
   return pack.relationships.filter(
     (edge) => edge.fromCharacterId === characterId || edge.toCharacterId === characterId,
   );
@@ -168,7 +174,7 @@ export function scoreRelationship(
   };
 }
 
-function createGraphDistances(pack: LessonPack, targetId: string): {
+function createGraphDistances(pack: RelationshipSpaceInput, targetId: string): {
   degrees: Map<string, number>;
   firstHops: Map<string, string>;
   pathEdgeIds: Set<string>;
@@ -195,7 +201,7 @@ function createGraphDistances(pack: LessonPack, targetId: string): {
 }
 
 function directPoint(
-  pack: LessonPack,
+  pack: RelationshipSpaceInput,
   targetId: string,
   characterId: string,
   sectorIndex: number,
@@ -343,7 +349,7 @@ function placeSeparated(
 }
 
 export function createRelationshipSpace(
-  pack: LessonPack,
+  pack: RelationshipSpaceInput,
   targetId: string,
 ): RelationshipSpaceLayout {
   if (!pack.characters.some((character) => character.id === targetId)) {

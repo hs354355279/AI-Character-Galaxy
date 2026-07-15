@@ -1,4 +1,5 @@
-import type { LessonPack } from "@/lib/lessons/schema";
+import type { CharacterGroup, CharacterNode } from "@/lib/lessons/schema";
+import type { RelationshipGraph } from "@/lib/network-expansion/schemas";
 
 export interface GalaxyPoint {
   x: number;
@@ -21,7 +22,12 @@ function round(value: number): number {
   return Math.round(value * 1000) / 1000;
 }
 
-export function createGalaxyLayout(pack: LessonPack): Map<string, GalaxyPoint> {
+type GalaxyLayoutInput = Pick<RelationshipGraph, "layoutSeed"> & {
+  groups: ReadonlyArray<CharacterGroup>;
+  characters: ReadonlyArray<CharacterNode>;
+};
+
+export function createGalaxyLayout(pack: GalaxyLayoutInput): Map<string, GalaxyPoint> {
   const random = mulberry32(pack.layoutSeed);
   const points = new Map<string, GalaxyPoint>();
   const groupCount = pack.groups.length;

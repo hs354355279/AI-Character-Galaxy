@@ -152,7 +152,7 @@ export type RuntimeRelationship = RelationshipEdge & {
 
 export interface RelationshipGraph {
   id: string;
-  layoutSeed: string;
+  layoutSeed: number;
   groups: CharacterGroup[];
   characters: RuntimeCharacter[];
   relationships: RuntimeRelationship[];

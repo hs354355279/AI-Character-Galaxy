@@ -5,6 +5,7 @@ import {
   NetworkExpansionBatchSchema,
   RelationshipNetworkExpansionStateSchema,
   type NetworkExpansionBatch,
+  type ExpandedCharacter,
   type RelationshipNetworkExpansionState,
 } from "@/lib/network-expansion/schemas";
 import {
@@ -18,7 +19,7 @@ import {
 
 const lesson = getLessonPack("french-revolution")!;
 
-function candidate(name: string, id = createExpandedCharacterId(name)) {
+function candidate(name: string, id = createExpandedCharacterId(name)): ExpandedCharacter {
   return {
     id,
     name,

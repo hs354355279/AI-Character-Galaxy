@@ -1,6 +1,7 @@
 import type { LessonPack, RelationshipEdge } from "@/lib/lessons/schema";
 import {
   EXPANDED_GROUP,
+  EXPANDED_GROUP_ID,
   MAX_EXPANDED_CHARACTERS,
   NetworkExpansionBatchSchema,
   RelationshipNetworkExpansionStateSchema,
@@ -85,7 +86,7 @@ export function mergeExpansionBatch(
     let id = candidate.id;
     let suffix = 2;
     while (usedIds.has(id)) id = `${candidate.id}-${suffix++}`;
-    const added = { ...candidate, id, groupId: EXPANDED_GROUP.id };
+    const added: ExpandedCharacter = { ...candidate, id, groupId: EXPANDED_GROUP_ID };
     additions.push(added);
     usedIds.add(id);
     idMap.set(candidate.id, id);

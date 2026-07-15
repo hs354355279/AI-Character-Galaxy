@@ -9,7 +9,10 @@ import {
   classifyRelationshipProminence,
   createRelationshipSpace,
 } from "@/lib/layout/relationship-space";
-import { createRelationshipPositionStore } from "@/lib/layout/relationship-transition";
+import {
+  createRelationshipPositionStore,
+  ensureRelationshipPositions,
+} from "@/lib/layout/relationship-transition";
 import { GalaxyParticles } from "@/components/galaxy/GalaxyParticles";
 import { PlanetNode } from "@/components/galaxy/PlanetNode";
 import { RelationshipAxesLegend } from "@/components/galaxy/RelationshipAxesLegend";
@@ -21,7 +24,7 @@ import {
   createGalaxyLabelTransform,
   getGalaxyLabelOpacity,
 } from "@/lib/layout/galaxy-label";
-import type { LessonPack } from "@/lib/lessons/schema";
+import type { RelationshipGraph } from "@/lib/network-expansion/schemas";
 
 interface GalaxyLabelPosition {
   id: string;
@@ -132,7 +135,7 @@ function GalaxyLabelProjector({
 }
 
 export function GalaxyScene({
-  lesson,
+  graph,
   selectedCharacterId,
   selectedRelationshipIds,
   highlightedRelationshipIds,
@@ -140,7 +143,7 @@ export function GalaxyScene({
   onSelectCharacter,
   onSelectRelationship,
 }: {
-  lesson: LessonPack;
+  graph: RelationshipGraph;
   selectedCharacterId: string | null;
   selectedRelationshipIds: string[];
   highlightedRelationshipIds: string[];
@@ -148,19 +151,20 @@ export function GalaxyScene({
   onSelectCharacter: (id: string) => void;
   onSelectRelationship: (id: string) => void;
 }) {
-  const overviewLayout = useMemo(() => createGalaxyLayout(lesson), [lesson]);
+  const overviewLayout = useMemo(() => createGalaxyLayout(graph), [graph]);
   const semanticLayout = useMemo(
-    () => selectedCharacterId ? createRelationshipSpace(lesson, selectedCharacterId) : null,
-    [lesson, selectedCharacterId],
+    () => selectedCharacterId ? createRelationshipSpace(graph, selectedCharacterId) : null,
+    [graph, selectedCharacterId],
   );
   const targetPoints = semanticLayout?.points ?? overviewLayout;
   const selectedCharacter = selectedCharacterId
-    ? lesson.characters.find((character) => character.id === selectedCharacterId)
+    ? graph.characters.find((character) => character.id === selectedCharacterId)
     : null;
-  const positions = useMemo(
-    () => createRelationshipPositionStore(overviewLayout),
-    [overviewLayout],
-  );
+  const [positions] = useState(() => createRelationshipPositionStore(overviewLayout));
+  const spawn = selectedCharacterId
+    ? targetPoints.get(selectedCharacterId) ?? { x: 0, y: 0, z: 0 }
+    : { x: 0, y: 0, z: 0 };
+  ensureRelationshipPositions(positions, targetPoints, spawn);
   const [viewport, setViewport] = useState(() => ({
     width: typeof window === "undefined" ? 1280 : window.innerWidth,
     height: typeof window === "undefined" ? 720 : window.innerHeight,
@@ -181,24 +185,24 @@ export function GalaxyScene({
   );
   const cameraFrame = useMemo(() => {
     const aspect = viewport.width / Math.max(1, viewport.height);
-    return lesson.characters.reduce(
+    return graph.characters.reduce(
       (largest, character) => {
         const frame = fitRelationshipCamera(
-          createRelationshipSpace(lesson, character.id).points.values(),
+          createRelationshipSpace(graph, character.id).points.values(),
           { aspect },
         );
         return frame.distance > largest.distance ? frame : largest;
       },
       fitRelationshipCamera([], { aspect }),
     );
-  }, [lesson, viewport.height, viewport.width]);
+  }, [graph, viewport.height, viewport.width]);
   const labelElementsRef = useRef(new Map<string, HTMLElement>());
   const labels = useMemo(
-    () => lesson.characters.map((character) => ({
+    () => graph.characters.map((character) => ({
       id: character.id,
       offsetY: 0.82 + character.importance * 0.1,
     })),
-    [lesson.characters],
+    [graph.characters],
   );
 
   return (
@@ -214,13 +218,13 @@ export function GalaxyScene({
           <hemisphereLight args={["#c5dcff", "#241b32", 1.1]} />
           <pointLight position={[5, 8, 12]} intensity={16} color="#b8d7ff" />
           <pointLight position={[-9, -4, 3]} intensity={9} color="#e86c7b" />
-          <GalaxyParticles quality={quality} seed={lesson.layoutSeed} />
+          <GalaxyParticles quality={quality} seed={graph.layoutSeed} />
           <RelationshipSpaceController
             positions={positions}
             targets={targetPoints}
             reduceMotion={reduceMotion}
           />
-          {lesson.relationships.map((relationship) => (
+          {graph.relationships.map((relationship) => (
             <RelationshipField
               key={relationship.id}
               relationship={relationship}
@@ -235,8 +239,8 @@ export function GalaxyScene({
               onSelect={() => onSelectRelationship(relationship.id)}
             />
           ))}
-          {lesson.characters.map((character) => {
-            const group = lesson.groups.find((item) => item.id === character.groupId)!;
+          {graph.characters.map((character) => {
+            const group = graph.groups.find((item) => item.id === character.groupId)!;
             return (
               <PlanetNode
                 key={character.id}
@@ -268,8 +272,8 @@ export function GalaxyScene({
         <RelationshipAxesLegend targetName={selectedCharacter.name} />
       ) : null}
       <div className="galaxy-label-layer">
-        {lesson.characters.map((character) => {
-          const group = lesson.groups.find((item) => item.id === character.groupId)!;
+        {graph.characters.map((character) => {
+          const group = graph.groups.find((item) => item.id === character.groupId)!;
           return (
             <div
               key={character.id}
@@ -285,7 +289,7 @@ export function GalaxyScene({
               aria-hidden="true"
               style={{ "--planet-accent": group.color } as React.CSSProperties}
             >
-              <span>{group.symbol}</span><strong>{character.name}</strong><small>{character.role}</small>
+              <span>{character.provenance === "ai-expanded" ? "AI" : group.symbol}</span><strong>{character.name}</strong><small>{character.role}</small>
             </div>
           );
         })}

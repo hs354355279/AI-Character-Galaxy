@@ -14,6 +14,18 @@ export function createRelationshipPositionStore(
   );
 }
 
+export function ensureRelationshipPositions(
+  positions: RelationshipPositionStore,
+  targets: Map<string, GalaxyPoint>,
+  spawn: GalaxyPoint,
+): void {
+  for (const id of targets.keys()) {
+    if (!positions.has(id)) {
+      positions.set(id, new THREE.Vector3(spawn.x, spawn.y, spawn.z));
+    }
+  }
+}
+
 export function advanceRelationshipPositions(
   positions: RelationshipPositionStore,
   targets: Map<string, GalaxyPoint>,

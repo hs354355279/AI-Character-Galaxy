@@ -1,6 +1,7 @@
 "use client";
 
-import type { CharacterGroup, CharacterNode } from "@/lib/lessons/schema";
+import type { CharacterGroup } from "@/lib/lessons/schema";
+import type { RuntimeCharacter } from "@/lib/network-expansion/schemas";
 
 export function CharacterRail({
   characters,
@@ -8,7 +9,7 @@ export function CharacterRail({
   selectedCharacterId,
   onSelect,
 }: {
-  characters: CharacterNode[];
+  characters: RuntimeCharacter[];
   groups?: CharacterGroup[];
   selectedCharacterId: string | null;
   onSelect: (id: string) => void;
@@ -37,6 +38,7 @@ export function CharacterRail({
               <span>
                 <strong>{character.name}</strong>
                 <small>{character.role}</small>
+                {character.provenance === "ai-expanded" ? <em>AI expanded</em> : null}
               </span>
             </button>
           );

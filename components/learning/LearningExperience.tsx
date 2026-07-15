@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useReducedMotion } from "motion/react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { RelationshipListView } from "@/components/accessibility/RelationshipListView";
 import { detectWebGL } from "@/components/accessibility/WebGLBoundary";
 import { GalaxyScene } from "@/components/galaxy/GalaxyScene";
@@ -18,6 +18,10 @@ import { evaluateMission, type MissionEvaluation } from "@/lib/missions/evaluate
 import { createLandingLesson } from "@/lib/landing/lesson-view-model";
 import { getAllLessonPacks } from "@/lib/lessons/repository";
 import type { LessonPack } from "@/lib/lessons/schema";
+import {
+  createEmptyExpansionState,
+  createRuntimeRelationshipGraph,
+} from "@/lib/network-expansion/runtime-graph";
 import {
   createLearningSession,
   loadLearningSession,
@@ -45,6 +49,10 @@ export function LearningExperience({
   initialFocusCharacterId?: string;
 }) {
   const reduceMotion = useReducedMotion() ?? false;
+  const runtimeGraph = useMemo(
+    () => createRuntimeRelationshipGraph(lesson, createEmptyExpansionState(lesson.id)),
+    [lesson],
+  );
   const [available, setAvailable] = useState(webglAvailable ?? false);
   const [view, setView] = useState<ViewMode>(
     initialView === "3d" && webglAvailable === true ? "3d" : "2d",
@@ -262,7 +270,7 @@ export function LearningExperience({
           )}
           galaxy={view === "3d" && available ? (
             <GalaxyScene
-              lesson={lesson}
+              graph={runtimeGraph}
               selectedCharacterId={focusedCharacterId}
               selectedRelationshipIds={selectedRelationshipIds}
               highlightedRelationshipIds={mission.relevantRelationshipIds}
@@ -272,7 +280,7 @@ export function LearningExperience({
             />
           ) : (
             <RelationshipListView
-              lesson={lesson}
+              graph={runtimeGraph}
               selectedCharacterIds={selectedCharacterIds}
               selectedRelationshipIds={selectedRelationshipIds}
               onSelectCharacter={selectCharacter}
@@ -289,8 +297,8 @@ export function LearningExperience({
           )}
           characterIndex={(
             <CharacterRail
-              characters={lesson.characters}
-              groups={lesson.groups}
+              characters={runtimeGraph.characters}
+              groups={runtimeGraph.groups}
               selectedCharacterId={focusedCharacterId}
               onSelect={selectCharacter}
             />
