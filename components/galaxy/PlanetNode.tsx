@@ -54,7 +54,7 @@ export function PlanetNode({
   animate: boolean;
   onSelect: () => void;
 }) {
-  const size = 0.25 + importance * 0.08;
+  const size = 0.38 + importance * 0.1;
   const seed = seedFromId(id);
   const groupRef = useRef<THREE.Group>(null);
   const surfaceRef = useRef<THREE.ShaderMaterial>(null);
@@ -84,7 +84,7 @@ export function PlanetNode({
         onPointerOver={() => { document.body.style.cursor = "pointer"; }}
         onPointerOut={() => { document.body.style.cursor = ""; }}
       >
-        <sphereGeometry args={[size * 1.18, 28, 28]} />
+        <sphereGeometry args={[size * 1.42, 28, 28]} />
         <meshBasicMaterial transparent opacity={0.001} depthWrite={false} />
       </mesh>
       <mesh raycast={disableRaycast}>

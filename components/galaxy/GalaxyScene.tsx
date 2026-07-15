@@ -16,6 +16,11 @@ import { RelationshipAxesLegend } from "@/components/galaxy/RelationshipAxesLege
 import { RelationshipField } from "@/components/galaxy/RelationshipField";
 import { RelationshipSpaceController } from "@/components/galaxy/RelationshipSpaceController";
 import { getGalaxyQuality } from "@/lib/galaxy/visual-quality";
+import { fitRelationshipCamera } from "@/lib/layout/relationship-camera";
+import {
+  createGalaxyLabelTransform,
+  getGalaxyLabelOpacity,
+} from "@/lib/layout/galaxy-label";
 import type { LessonPack } from "@/lib/lessons/schema";
 
 interface GalaxyLabelPosition {
@@ -46,7 +51,6 @@ function GalaxyLabelProjector({
       x: number;
       y: number;
       z: number;
-      scale: number;
     }> = [];
 
     for (const label of labels) {
@@ -78,18 +82,16 @@ function GalaxyLabelProjector({
       const x = (projected.x * 0.5 + 0.5) * size.width;
       const y = (-projected.y * 0.5 + 0.5) * size.height;
       const distance = Math.max(1, camera.position.distanceTo(world));
-      const scale = camera instanceof THREE.PerspectiveCamera
-        ? 13 / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2) * distance)
-        : camera.zoom;
 
       element.style.visibility = "visible";
-      projectedLabels.push({ element, x, y, z: projected.z, scale });
+      element.style.opacity = String(getGalaxyLabelOpacity(distance));
+      projectedLabels.push({ element, x, y, z: projected.z });
     }
 
     const placed: Array<{ left: number; right: number; top: number; bottom: number }> = [];
     for (const label of projectedLabels) {
-      const width = Math.max(1, label.element.offsetWidth * label.scale);
-      const height = Math.max(1, label.element.offsetHeight * label.scale);
+      const width = Math.max(1, label.element.offsetWidth);
+      const height = Math.max(1, label.element.offsetHeight);
       const x = Math.min(size.width - width / 2 - 8, Math.max(width / 2 + 8, label.x));
       const step = height + 6;
       let y = Math.max(38 + height / 2, label.y);
@@ -122,7 +124,7 @@ function GalaxyLabelProjector({
       }
 
       label.element.style.zIndex = String(Math.round((1 - label.z) * 1000));
-      label.element.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%) scale(${label.scale})`;
+      label.element.style.transform = createGalaxyLabelTransform(x, y);
     }
   });
 
@@ -161,11 +163,13 @@ export function GalaxyScene({
   );
   const [viewport, setViewport] = useState(() => ({
     width: typeof window === "undefined" ? 1280 : window.innerWidth,
+    height: typeof window === "undefined" ? 720 : window.innerHeight,
     devicePixelRatio: typeof window === "undefined" ? 1 : window.devicePixelRatio,
   }));
   useEffect(() => {
     const update = () => setViewport({
       width: window.innerWidth,
+      height: window.innerHeight,
       devicePixelRatio: window.devicePixelRatio,
     });
     window.addEventListener("resize", update, { passive: true });
@@ -175,11 +179,24 @@ export function GalaxyScene({
     () => getGalaxyQuality({ ...viewport, reducedMotion: reduceMotion }),
     [reduceMotion, viewport],
   );
+  const cameraFrame = useMemo(() => {
+    const aspect = viewport.width / Math.max(1, viewport.height);
+    return lesson.characters.reduce(
+      (largest, character) => {
+        const frame = fitRelationshipCamera(
+          createRelationshipSpace(lesson, character.id).points.values(),
+          { aspect },
+        );
+        return frame.distance > largest.distance ? frame : largest;
+      },
+      fitRelationshipCamera([], { aspect }),
+    );
+  }, [lesson, viewport.height, viewport.width]);
   const labelElementsRef = useRef(new Map<string, HTMLElement>());
   const labels = useMemo(
     () => lesson.characters.map((character) => ({
       id: character.id,
-      offsetY: 0.6 + character.importance * 0.08,
+      offsetY: 0.82 + character.importance * 0.1,
     })),
     [lesson.characters],
   );
@@ -188,7 +205,7 @@ export function GalaxyScene({
     <div className="galaxy-canvas" aria-label="Interactive 3D relationship galaxy">
       <div className="galaxy-canvas-surface">
         <Canvas
-          camera={{ position: [0, 1, 18], fov: 44 }}
+          camera={{ position: [0, 1, cameraFrame.distance], fov: cameraFrame.fov }}
           dpr={quality.dpr}
           gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
         >
@@ -237,8 +254,8 @@ export function GalaxyScene({
             target={[0, 0, 0]}
             enablePan={false}
             enableDamping={!reduceMotion}
-            minDistance={8}
-            maxDistance={28}
+            minDistance={cameraFrame.minDistance}
+            maxDistance={cameraFrame.maxDistance}
           />
           <GalaxyLabelProjector
             labels={labels}
@@ -259,6 +276,7 @@ export function GalaxyScene({
               data-character-label={character.name}
               data-selected={selectedCharacterId === character.id ? "true" : undefined}
               data-space-origin={selectedCharacterId === character.id ? "true" : undefined}
+              data-label-layer={semanticLayout?.points.get(character.id)?.layer ?? "overview"}
               ref={(element) => {
                 if (element) labelElementsRef.current.set(character.id, element);
                 else labelElementsRef.current.delete(character.id);

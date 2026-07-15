@@ -3539,18 +3539,19 @@ button {
   pointer-events: none;
   transform-origin: center;
   will-change: transform;
-  min-width: 10.25rem;
+  min-width: 11.75rem;
+  min-height: 3rem;
   display: grid;
   grid-template-columns: 1.2rem 1fr;
   gap: 0.1rem 0.4rem;
   align-items: center;
-  padding: 0.48rem 0.62rem;
+  padding: 0.55rem 0.7rem;
   border: 1px solid rgba(243, 241, 234, 0.18);
-  border-radius: 0.25rem;
+  border-radius: 0;
   color: #f3f1ea;
-  background: rgba(7, 11, 20, 0.78);
+  background: rgba(7, 11, 20, 0.96);
   box-shadow: 0 0.8rem 2.2rem rgba(0, 0, 0, 0.22);
-  backdrop-filter: blur(14px) saturate(125%);
+  backdrop-filter: none;
   cursor: default;
   transition:
     color 250ms ease,
@@ -3584,13 +3585,19 @@ button {
 }
 
 .galaxy-node-label strong {
-  font-size: 0.68rem;
+  font-size: 14px;
+  line-height: 1.15;
 }
 
 .galaxy-node-label small {
   color: inherit;
-  font-size: 0.55rem;
+  font-size: 11px;
+  line-height: 1.2;
   opacity: 0.62;
+}
+
+.galaxy-node-label[data-label-layer="context"] small {
+  display: none;
 }
 
 .missions-complete {
