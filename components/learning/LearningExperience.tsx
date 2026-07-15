@@ -284,6 +284,8 @@ export function LearningExperience({
       ) : (
         <ObservatoryShell
           lesson={lesson}
+          characterCount={runtimeGraph.characters.length}
+          relationshipCount={runtimeGraph.relationships.length}
           status={!available ? (
             <div className="webgl-status" role="status">
               3D is unavailable on this device. The complete lesson is open in the 2D relationship list.

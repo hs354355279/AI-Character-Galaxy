@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { maryExpansionState } from "../tests/fixtures/network-expansion";
 
 test("keyboard and reduced-motion path preserves the complete 2D lesson", async ({ page }) => {
   await page.addInitScript(() => {
@@ -44,4 +45,31 @@ test("keyboard and reduced-motion path preserves the complete 2D lesson", async 
     () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
   );
   expect(horizontalOverflow).toBe(false);
+});
+
+test("mobile restores AI-expanded people with textual provenance and complete keyboard access", async ({ page }) => {
+  await page.addInitScript((state) => {
+    window.sessionStorage.setItem(
+      "ai-character-galaxy:network-expansion:french-revolution",
+      JSON.stringify(state),
+    );
+  }, maryExpansionState);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/learn/french-revolution?focus=olympe-de-gouges");
+
+  await expect(page.getByLabel("2D relationship list")).toBeVisible();
+  const mary = page.getByRole("button", { name: "Select Mary Wollstonecraft" });
+  await expect(mary).toContainText("AI expanded");
+  await mary.focus();
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("heading", { name: "Mary Wollstonecraft", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Mary Wollstonecraft biography/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Inspect Mary Wollstonecraft/ })).toContainText("AI expanded");
+  await page.screenshot({
+    path: "output/playwright/network-expansion-mobile.png",
+    fullPage: true,
+  });
+  expect(await page.evaluate(
+    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+  )).toBeLessThanOrEqual(1);
 });

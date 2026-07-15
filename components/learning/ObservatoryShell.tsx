@@ -8,6 +8,8 @@ export function ObservatoryShell({
   evidence,
   characterIndex,
   status,
+  characterCount,
+  relationshipCount,
 }: {
   lesson: LessonPack;
   mission: ReactNode;
@@ -15,6 +17,8 @@ export function ObservatoryShell({
   evidence: ReactNode;
   characterIndex: ReactNode;
   status?: ReactNode;
+  characterCount?: number;
+  relationshipCount?: number;
 }) {
   return (
     <div className="observatory-shell">
@@ -25,7 +29,7 @@ export function ObservatoryShell({
         <header className="observatory-caption">
           <span>{lesson.kind}</span>
           <strong>{lesson.title}</strong>
-          <i>{lesson.characters.length} people · {lesson.relationships.length} relationships</i>
+          <i>{characterCount ?? lesson.characters.length} people · {relationshipCount ?? lesson.relationships.length} relationships</i>
         </header>
         {status}
         <div className="galaxy-viewport">{galaxy}</div>

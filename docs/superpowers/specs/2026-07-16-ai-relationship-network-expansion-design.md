@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-16
 
-**Status:** Approved for implementation
+**Status:** Implemented and verified
 
 **Product:** AI Character Galaxy
 
@@ -117,7 +117,7 @@ Layout functions will accept the smallest graph contract they need instead of th
 ```ts
 interface RelationshipGraph {
   id: string;
-  layoutSeed: string;
+  layoutSeed: number;
   groups: CharacterGroup[];
   characters: GraphCharacter[];
   relationships: GraphRelationship[];
@@ -303,7 +303,15 @@ The feature is complete when:
 9. Invalid or failed AI responses do not mutate the graph.
 10. Unit, integration, component, accessibility, and real-browser tests pass.
 
-## 14. Official API references
+## 14. Verification record
+
+Verified on 2026-07-16:
+
+- `npm run verify`: 40 Vitest files and 112 tests passed, both lesson packs validated, and the optimized Next.js build completed with TypeScript checks.
+- `npm run test:e2e`: 21 Chromium journeys passed, including planet hit testing, repeated focus changes, 3D origin/depth, zoom-label clarity, fixed desktop height, mobile 2D parity, network expansion, same-tab restoration, citations, keyboard access, and overflow checks.
+- Final desktop and mobile captures are produced under `output/playwright/` and were visually inspected.
+
+## 15. Official API references
 
 - OpenAI Web Search requires citations shown to end users to be clearly visible and clickable: <https://developers.openai.com/api/docs/guides/tools-web-search#output-and-citations>
 - OpenAI Structured Outputs support strict JSON Schema and JavaScript Zod helpers, including GPT-5.6: <https://developers.openai.com/api/docs/guides/structured-outputs>

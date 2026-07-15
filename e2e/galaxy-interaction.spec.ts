@@ -1,4 +1,55 @@
 import { expect, test } from "@playwright/test";
+import { maryExpansionBatch } from "../tests/fixtures/network-expansion";
+
+const recursiveExpansionBatch = {
+  ...maryExpansionBatch,
+  characters: [
+    maryExpansionBatch.characters[0],
+    {
+      ...maryExpansionBatch.characters[0],
+      id: "ai-nicolas-de-condorcet",
+      name: "Nicolas de Condorcet",
+      role: "Philosopher and political reformer",
+      summary: "Nicolas de Condorcet argued for political reform, education, and equal civic rights during the Revolution.",
+      sourceRefIds: ["source-condorcet"],
+      citationIds: ["source-condorcet"],
+    },
+    {
+      ...maryExpansionBatch.characters[0],
+      id: "ai-thomas-paine",
+      name: "Thomas Paine",
+      role: "Political writer and revolutionary",
+      summary: "Thomas Paine defended republican government and participated in political debate during the French Revolution.",
+      sourceRefIds: ["source-paine"],
+      citationIds: ["source-paine"],
+    },
+  ],
+  relationships: [
+    maryExpansionBatch.relationships[0],
+    {
+      ...maryExpansionBatch.relationships[0],
+      id: "ai-olympe-de-gouges-ai-nicolas-de-condorcet-influence",
+      toCharacterId: "ai-nicolas-de-condorcet",
+      sourceRefIds: ["source-condorcet"],
+      citationIds: ["source-condorcet"],
+      summary: "Their reform arguments intersected in debates about political equality and citizenship.",
+    },
+    {
+      ...maryExpansionBatch.relationships[0],
+      id: "ai-olympe-de-gouges-ai-thomas-paine-alliance",
+      toCharacterId: "ai-thomas-paine",
+      type: "alliance" as const,
+      sourceRefIds: ["source-paine"],
+      citationIds: ["source-paine"],
+      summary: "Their revolutionary politics connected them within debates about republican government and rights.",
+    },
+  ],
+  citations: [
+    maryExpansionBatch.citations[0],
+    { id: "source-condorcet", title: "Nicolas de Condorcet biography", url: "https://example.org/condorcet" },
+    { id: "source-paine", title: "Thomas Paine biography", url: "https://example.org/paine" },
+  ],
+};
 
 async function startFrenchRevolution(page: import("@playwright/test").Page) {
   await page.goto("/learn/french-revolution");
@@ -190,4 +241,62 @@ test("mobile opens the complete 2D relationship view without document overflow",
   expect(await page.evaluate(
     () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
   )).toBeLessThanOrEqual(1);
+});
+
+test("a sourced GPT-5.6 expansion grows 3D and 2D around the selected origin and survives refresh", async ({ page }) => {
+  const pageErrors: string[] = [];
+  page.on("pageerror", (error) => pageErrors.push(error.message));
+  page.on("console", (message) => {
+    if (message.type() === "error") pageErrors.push(message.text());
+  });
+  await page.route("**/api/learning/expand-network", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ source: "gpt-5.6", data: recursiveExpansionBatch }),
+    });
+  });
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/learn/french-revolution?focus=olympe-de-gouges");
+
+  const origin = page.locator('[data-character-label="Olympe de Gouges"]');
+  await expect(origin).toHaveAttribute("data-projection-ready", "true");
+  await page.getByRole("button", { name: "Expand relationship galaxy with GPT-5.6" }).click();
+
+  await expect(page.getByRole("status")).toContainText("Added 3 people");
+  await expect(page.locator(".character-rail-heading")).toContainText("12 subjects");
+  await expect(page.locator(".galaxy-canvas")).toHaveAttribute("data-character-count", "12");
+  await expect(page.locator(".galaxy-canvas")).toHaveAttribute("data-relationship-count", "15");
+  for (const name of ["Mary Wollstonecraft", "Nicolas de Condorcet", "Thomas Paine"]) {
+    await expect(page.locator(`[data-character-label="${name}"]`)).toHaveAttribute(
+      "data-projection-ready",
+      "true",
+    );
+  }
+  await expect(origin).toHaveAttribute("data-space-origin", "true");
+  await expect.poll(async () => Math.abs(Number(await origin.getAttribute("data-world-x")))).toBeLessThan(0.1);
+  await expect.poll(async () => Math.abs(Number(await origin.getAttribute("data-world-y")))).toBeLessThan(0.1);
+  await expect.poll(async () => Math.abs(Number(await origin.getAttribute("data-world-z")))).toBeLessThan(0.1);
+  await page.screenshot({
+    path: "output/playwright/network-expansion-desktop.png",
+    fullPage: true,
+  });
+
+  await page.getByRole("button", { name: "Select Mary Wollstonecraft" }).click();
+  await expect(page.getByRole("heading", { name: "Mary Wollstonecraft", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Mary Wollstonecraft biography/ })).toBeVisible();
+
+  await page.reload();
+  await expect(page.locator('[data-character-label="Mary Wollstonecraft"]')).toHaveAttribute(
+    "data-projection-ready",
+    "true",
+  );
+  await page.getByRole("button", { name: "2D list", exact: true }).click();
+  await expect(page.getByText("12 people · 15 links")).toBeVisible();
+  await expect(page.getByRole("button", { name: /Inspect Mary Wollstonecraft/ })).toContainText("AI expanded");
+  await expect(page.getByRole("button", { name: /Olympe de Gouges.*Mary Wollstonecraft/ })).toBeVisible();
+  expect(await page.evaluate(
+    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+  )).toBeLessThanOrEqual(1);
+  expect(pageErrors).toEqual([]);
 });

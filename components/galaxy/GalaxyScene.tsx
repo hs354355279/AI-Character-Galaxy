@@ -206,7 +206,12 @@ export function GalaxyScene({
   );
 
   return (
-    <div className="galaxy-canvas" aria-label="Interactive 3D relationship galaxy">
+    <div
+      className="galaxy-canvas"
+      aria-label="Interactive 3D relationship galaxy"
+      data-character-count={graph.characters.length}
+      data-relationship-count={graph.relationships.length}
+    >
       <div className="galaxy-canvas-surface">
         <Canvas
           camera={{ position: [0, 1, cameraFrame.distance], fov: cameraFrame.fov }}
