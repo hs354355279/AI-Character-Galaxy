@@ -25,6 +25,16 @@ import {
   buildCharacterResearchPrompt,
   CHARACTER_RESEARCH_DEVELOPER_PROMPT,
 } from "@/lib/openai/character-prompts";
+import {
+  NetworkExpansionModelOutputSchema,
+  type ExpandNetworkRequest,
+  type NetworkExpansionModelResult,
+} from "@/lib/network-expansion/schemas";
+import {
+  buildNetworkExpansionPrompt,
+  NETWORK_EXPANSION_DEVELOPER_PROMPT,
+  type NetworkExpansionPromptContext,
+} from "@/lib/openai/network-expansion-prompts";
 
 function client() {
   if (!process.env.OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is not configured.");
@@ -35,7 +45,7 @@ function model() {
   return process.env.OPENAI_MODEL || "gpt-5.6";
 }
 
-function extractCharacterCitations(response: unknown): CharacterResearchCitation[] {
+export function extractWebCitations(response: unknown): CharacterResearchCitation[] {
   const output = (response as {
     output?: Array<{
       action?: { sources?: Array<{ title?: string; url?: string }> };
@@ -90,7 +100,36 @@ export async function callCharacterResearchModel(
     if (hasRefusal(response)) error.name = "CharacterResearchRefusalError";
     throw error;
   }
-  return { profile: response.output_parsed, citations: extractCharacterCitations(response) };
+  return { profile: response.output_parsed, citations: extractWebCitations(response) };
+}
+
+export async function callRelationshipNetworkExpansionModel(
+  request: ExpandNetworkRequest,
+  context: NetworkExpansionPromptContext,
+  safetyIdentifier: string,
+): Promise<NetworkExpansionModelResult> {
+  const response = await client().responses.parse(
+    {
+      model: model(),
+      reasoning: { effort: "low" },
+      tools: [{ type: "web_search", search_context_size: "low" }],
+      tool_choice: "required",
+      include: ["web_search_call.action.sources"],
+      safety_identifier: safetyIdentifier,
+      input: [
+        { role: "developer", content: NETWORK_EXPANSION_DEVELOPER_PROMPT },
+        { role: "user", content: buildNetworkExpansionPrompt(request, context) },
+      ],
+      text: { format: zodTextFormat(NetworkExpansionModelOutputSchema, "relationship_network_expansion") },
+    },
+    { timeout: 20_000 },
+  );
+  if (!response.output_parsed) {
+    const error = new Error("The model returned no parsed relationship expansion.");
+    if (hasRefusal(response)) error.name = "NetworkExpansionRefusalError";
+    throw error;
+  }
+  return { output: response.output_parsed, citations: extractWebCitations(response) };
 }
 
 export async function callExplanationModel(

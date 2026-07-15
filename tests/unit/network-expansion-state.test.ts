@@ -11,6 +11,7 @@ import {
   createEmptyExpansionState,
   createExpandedCharacterId,
   createExpandedRelationshipId,
+  createRelationshipKey,
   createRuntimeRelationshipGraph,
   mergeExpansionBatch,
 } from "@/lib/network-expansion/runtime-graph";
@@ -85,6 +86,12 @@ describe("relationship network expansion state", () => {
     expect(createExpandedCharacterId("Mary—Wollstonecraft")).toBe("ai-mary-wollstonecraft");
     expect(createExpandedRelationshipId("olympe-de-gouges", "ai-mary-wollstonecraft", "influence"))
       .toBe("ai-olympe-de-gouges-ai-mary-wollstonecraft-influence");
+    expect(createRelationshipKey({
+      fromCharacterId: "b",
+      toCharacterId: "a",
+      type: "friendship",
+      direction: "undirected",
+    })).toBe("undirected:a:b:friendship");
   });
 
   it("merges additions without mutating the reviewed lesson", () => {

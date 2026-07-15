@@ -26,7 +26,7 @@ function identityNames(character: { name: string; aliases: string[] }): string[]
   ));
 }
 
-function relationshipKey(edge: Pick<RelationshipEdge, "fromCharacterId" | "toCharacterId" | "type" | "direction">): string {
+export function createRelationshipKey(edge: Pick<RelationshipEdge, "fromCharacterId" | "toCharacterId" | "type" | "direction">): string {
   const endpoints = edge.direction === "undirected"
     ? [edge.fromCharacterId, edge.toCharacterId].sort()
     : [edge.fromCharacterId, edge.toCharacterId];
@@ -94,8 +94,8 @@ export function mergeExpansionBatch(
 
   const availableIds = new Set([...usedIds]);
   const existingRelationshipKeys = new Set([
-    ...lesson.relationships.map(relationshipKey),
-    ...state.relationships.map(relationshipKey),
+    ...lesson.relationships.map(createRelationshipKey),
+    ...state.relationships.map(createRelationshipKey),
   ]);
   const relationshipAdditions: ExpandedRelationship[] = [];
   for (const edge of batch.relationships) {
@@ -108,7 +108,7 @@ export function mergeExpansionBatch(
       fromCharacterId,
       toCharacterId,
     };
-    const key = relationshipKey(remapped);
+    const key = createRelationshipKey(remapped);
     if (existingRelationshipKeys.has(key)) continue;
     existingRelationshipKeys.add(key);
     relationshipAdditions.push(remapped);
