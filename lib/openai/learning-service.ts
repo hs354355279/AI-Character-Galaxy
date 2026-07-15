@@ -1,5 +1,6 @@
-import { createHash } from "node:crypto";
 import type { LessonPack } from "@/lib/lessons/schema";
+export { createSafetyIdentifier } from "@/lib/openai/safety";
+import { createSafetyIdentifier } from "@/lib/openai/safety";
 import {
   callAssessmentModel,
   callExplanationModel,
@@ -32,11 +33,6 @@ type ModelCaller<Request, Output> = (
   lesson: LessonPack,
   safetyIdentifier: string,
 ) => Promise<unknown | Output>;
-
-export function createSafetyIdentifier(sessionId: string): string {
-  const digest = createHash("sha256").update(sessionId).digest("hex").slice(0, 32);
-  return `acg_${digest}`;
-}
 
 function isSubset(values: string[], allowed: Set<string>): boolean {
   return values.every((value) => allowed.has(value));
