@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { RelationshipListView } from "@/components/accessibility/RelationshipListView";
 import { detectWebGL } from "@/components/accessibility/WebGLBoundary";
 import { GalaxyScene } from "@/components/galaxy/GalaxyScene";
@@ -44,9 +44,9 @@ export function LearningExperience({
   initialFocusCharacterId?: string;
 }) {
   const reduceMotion = useReducedMotion() ?? false;
-  const available = useMemo(
-    () => webglAvailable ?? detectWebGL(),
-    [webglAvailable],
+  const [available, setAvailable] = useState(webglAvailable ?? false);
+  const [view, setView] = useState<ViewMode>(
+    initialView === "3d" && webglAvailable === true ? "3d" : "2d",
   );
   const validInitialFocus = lesson.characters.some(
     (character) => character.id === initialFocusCharacterId,
@@ -56,7 +56,17 @@ export function LearningExperience({
   const [phase, setPhase] = useState<Phase>(
     initialSession || validInitialFocus ? "explore" : "intro",
   );
-  const [view, setView] = useState<ViewMode>(initialView === "3d" && !available ? "2d" : initialView);
+  useEffect(() => {
+    if (webglAvailable !== undefined) {
+      setAvailable(webglAvailable);
+      if (!webglAvailable) setView("2d");
+      return;
+    }
+
+    const detected = detectWebGL();
+    setAvailable(detected);
+    if (detected && initialView === "3d") setView("3d");
+  }, [initialView, webglAvailable]);
   const [session, setSession] = useState<LearningSession>(() => {
     if (initialSession) return initialSession;
     const created = createLearningSession(lesson.id);

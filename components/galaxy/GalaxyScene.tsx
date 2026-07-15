@@ -5,10 +5,14 @@ import { OrbitControls } from "@react-three/drei";
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import * as THREE from "three";
 import { createGalaxyLayout } from "@/lib/layout/galaxy-layout";
-import { createRelationshipSpace } from "@/lib/layout/relationship-space";
+import {
+  classifyRelationshipProminence,
+  createRelationshipSpace,
+} from "@/lib/layout/relationship-space";
 import { createRelationshipPositionStore } from "@/lib/layout/relationship-transition";
 import { GalaxyParticles } from "@/components/galaxy/GalaxyParticles";
 import { PlanetNode } from "@/components/galaxy/PlanetNode";
+import { RelationshipAxesLegend } from "@/components/galaxy/RelationshipAxesLegend";
 import { RelationshipField } from "@/components/galaxy/RelationshipField";
 import { RelationshipSpaceController } from "@/components/galaxy/RelationshipSpaceController";
 import { getGalaxyQuality } from "@/lib/galaxy/visual-quality";
@@ -53,6 +57,9 @@ function GalaxyLabelProjector({
       planetProjected.copy(point).project(camera);
       element.dataset.planetX = String((planetProjected.x * 0.5 + 0.5) * size.width);
       element.dataset.planetY = String((-planetProjected.y * 0.5 + 0.5) * size.height);
+      element.dataset.worldX = point.x.toFixed(3);
+      element.dataset.worldY = point.y.toFixed(3);
+      element.dataset.worldZ = point.z.toFixed(3);
       element.dataset.projectionReady = "true";
       world.set(point.x, point.y + label.offsetY, point.z);
       pointDirection.copy(world).sub(camera.position);
@@ -145,6 +152,9 @@ export function GalaxyScene({
     [lesson, selectedCharacterId],
   );
   const targetPoints = semanticLayout?.points ?? overviewLayout;
+  const selectedCharacter = selectedCharacterId
+    ? lesson.characters.find((character) => character.id === selectedCharacterId)
+    : null;
   const positions = useMemo(
     () => createRelationshipPositionStore(overviewLayout),
     [overviewLayout],
@@ -201,6 +211,9 @@ export function GalaxyScene({
               to={positions.get(relationship.toCharacterId)!}
               selected={selectedRelationshipIds.includes(relationship.id)}
               highlighted={highlightedRelationshipIds.includes(relationship.id)}
+              prominence={semanticLayout
+                ? classifyRelationshipProminence(relationship, semanticLayout)
+                : "context"}
               animate={quality.animate}
               onSelect={() => onSelectRelationship(relationship.id)}
             />
@@ -234,6 +247,9 @@ export function GalaxyScene({
           />
         </Canvas>
       </div>
+      {selectedCharacter ? (
+        <RelationshipAxesLegend targetName={selectedCharacter.name} />
+      ) : null}
       <div className="galaxy-label-layer">
         {lesson.characters.map((character) => {
           const group = lesson.groups.find((item) => item.id === character.groupId)!;
@@ -242,6 +258,7 @@ export function GalaxyScene({
               key={character.id}
               data-character-label={character.name}
               data-selected={selectedCharacterId === character.id ? "true" : undefined}
+              data-space-origin={selectedCharacterId === character.id ? "true" : undefined}
               ref={(element) => {
                 if (element) labelElementsRef.current.set(character.id, element);
                 else labelElementsRef.current.delete(character.id);

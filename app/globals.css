@@ -2674,44 +2674,6 @@ button {
   }
 }
 
-@media (min-width: 1181px) {
-  .learning-workspace {
-    height: 100svh;
-    min-height: 0;
-    overflow: hidden;
-  }
-
-  .learning-workspace .workspace-grid {
-    height: calc(100svh - 7.8rem);
-    min-height: 0;
-    overflow: hidden;
-  }
-
-  .observatory-stage {
-    height: 100%;
-    min-height: 0;
-    grid-template-rows: minmax(0, 1fr) auto;
-    overflow: hidden;
-  }
-
-  .learning-workspace .workspace-panel,
-  .learning-workspace .galaxy-viewport {
-    min-height: 0;
-    height: 100%;
-  }
-
-  .learning-workspace .workspace-panel {
-    position: relative;
-    top: auto;
-    overscroll-behavior: contain;
-  }
-
-  .galaxy-canvas {
-    overscroll-behavior: none;
-    touch-action: none;
-  }
-}
-
 /* Reviewed character atlas */
 .character-atlas-page {
   --atlas-paper: #eeece5;
@@ -3509,6 +3471,65 @@ button {
   pointer-events: none;
 }
 
+.relationship-axes-legend {
+  position: absolute;
+  z-index: 6;
+  bottom: 1rem;
+  left: 1rem;
+  width: min(18rem, calc(100% - 2rem));
+  padding: 0.72rem 0.8rem;
+  border: 1px solid rgba(218, 226, 247, 0.16);
+  border-radius: 0.45rem;
+  color: rgba(241, 243, 249, 0.74);
+  background: rgba(7, 11, 20, 0.72);
+  box-shadow: 0 1rem 2.8rem rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(16px) saturate(120%);
+  pointer-events: none;
+}
+
+.relationship-axes-legend > p {
+  margin: 0 0 0.15rem;
+  color: #8fa6d8;
+  font-size: 0.56rem;
+  font-weight: 760;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.relationship-axes-legend > strong {
+  display: block;
+  margin-bottom: 0.52rem;
+  color: #f3f1ea;
+  font-size: 0.72rem;
+}
+
+.relationship-axes-legend dl,
+.relationship-axes-legend dl > div {
+  margin: 0;
+}
+
+.relationship-axes-legend dl {
+  display: grid;
+  gap: 0.22rem;
+}
+
+.relationship-axes-legend dl > div {
+  display: grid;
+  grid-template-columns: 3.8rem 1fr;
+  gap: 0.35rem;
+  font-size: 0.56rem;
+  line-height: 1.35;
+}
+
+.relationship-axes-legend dt {
+  color: #f3f1ea;
+  font-weight: 700;
+}
+
+.relationship-axes-legend dd {
+  margin: 0;
+}
+
 .galaxy-node-label {
   --planet-accent: #9a86d8;
   position: absolute;
@@ -3976,5 +3997,49 @@ button {
 
   .learning-workspace .evidence-panel {
     grid-column: auto;
+  }
+}
+
+/* Desktop observatory is one bounded viewport; smaller screens keep document flow. */
+@media (min-width: 1181px) {
+  .learning-workspace {
+    height: 100svh;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .learning-workspace .workspace-grid {
+    height: calc(100svh - 7.8rem);
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .learning-workspace .observatory-stage {
+    height: 100%;
+    min-height: 0;
+    grid-template-rows: minmax(0, 1fr) auto;
+    overflow: hidden;
+  }
+
+  .learning-workspace .workspace-panel,
+  .learning-workspace .galaxy-viewport {
+    min-height: 0;
+    height: 100%;
+  }
+
+  .learning-workspace .galaxy-viewport {
+    overflow: hidden;
+  }
+
+  .learning-workspace .workspace-panel {
+    position: relative;
+    top: auto;
+    overscroll-behavior: contain;
+  }
+
+  .learning-workspace .galaxy-canvas {
+    min-height: 0;
+    overscroll-behavior: none;
+    touch-action: none;
   }
 }

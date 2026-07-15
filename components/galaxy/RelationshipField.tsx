@@ -3,7 +3,30 @@
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
+import type { RelationshipProminence } from "@/lib/layout/relationship-space";
 import type { RelationshipEdge } from "@/lib/lessons/schema";
+
+const AFFINITY_TYPES = new Set<RelationshipEdge["type"]>([
+  "alliance",
+  "family",
+  "friendship",
+  "mentorship",
+  "romance",
+]);
+
+function relationshipTone(relationship: RelationshipEdge): string {
+  if (relationship.type === "conflict" || relationship.type === "political-rivalry") {
+    return "#f28a96";
+  }
+  if (AFFINITY_TYPES.has(relationship.type)) return "#b8d8ff";
+  return "#c5b5e8";
+}
+
+function relationshipOpacity(prominence: RelationshipProminence): number {
+  if (prominence === "origin") return 0.66;
+  if (prominence === "second-degree") return 0.32;
+  return 0.14;
+}
 
 export function RelationshipField({
   relationship,
@@ -11,6 +34,7 @@ export function RelationshipField({
   to,
   selected,
   highlighted,
+  prominence,
   animate,
   onSelect,
 }: {
@@ -19,6 +43,7 @@ export function RelationshipField({
   to: THREE.Vector3;
   selected: boolean;
   highlighted: boolean;
+  prominence: RelationshipProminence;
   animate: boolean;
   onSelect: () => void;
 }) {
@@ -60,9 +85,13 @@ export function RelationshipField({
         }}
       >
         <lineBasicMaterial
-          color={highlighted ? "#f5f2e9" : selected ? "#a9d9ff" : "#78819b"}
+          color={highlighted ? "#f5f2e9" : selected ? "#dcecff" : relationshipTone(relationship)}
           transparent
-          opacity={highlighted ? 0.92 : selected ? 0.84 : relationship.isDisputed ? 0.2 : 0.38}
+          opacity={highlighted
+            ? 0.94
+            : selected
+              ? 0.86
+              : relationshipOpacity(prominence) * (relationship.isDisputed ? 0.62 : 1)}
         />
       </lineSegments>
       {highlighted ? (

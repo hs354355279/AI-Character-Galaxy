@@ -26,9 +26,14 @@ test("a planet remains selectable when a relationship line crosses in front of i
   await expect(page.getByText("Relationship evidence", { exact: true })).toHaveCount(0);
 });
 
-test("the character rail drives repeated camera focus without runtime errors", async ({ page }) => {
+test("the character rail repeatedly re-centers relationship space without runtime errors", async ({ page }) => {
   const pageErrors: string[] = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
+  page.on("console", (message) => {
+    if (message.type() === "error" && /hydration failed/i.test(message.text())) {
+      pageErrors.push(message.text());
+    }
+  });
 
   await startFrenchRevolution(page);
 
@@ -65,7 +70,35 @@ test("desktop observatory owns one viewport without document scrolling", async (
   }));
   expect(before.scroll).toBeLessThanOrEqual(before.client + 1);
 
+  const galaxyViewport = await page.locator(".galaxy-viewport").evaluate((element) => ({
+    client: element.clientHeight,
+    scroll: element.scrollHeight,
+  }));
+  expect(galaxyViewport.scroll).toBeLessThanOrEqual(galaxyViewport.client + 1);
+
   await page.locator(".galaxy-canvas").hover();
   await page.mouse.wheel(0, 600);
   expect(await page.evaluate(() => scrollY)).toBe(before.y);
+});
+
+test("a selected character becomes the origin of a genuinely three-dimensional space", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/learn/romeo-and-juliet?focus=romeo");
+
+  const romeo = page.locator('[data-character-label="Romeo Montague"]');
+  await expect(romeo).toHaveAttribute("data-space-origin", "true");
+  await expect.poll(async () => Math.abs(Number(await romeo.getAttribute("data-world-x")))).toBeLessThan(0.1);
+  await expect.poll(async () => Math.abs(Number(await romeo.getAttribute("data-world-y")))).toBeLessThan(0.1);
+  await expect.poll(async () => Math.abs(Number(await romeo.getAttribute("data-world-z")))).toBeLessThan(0.1);
+
+  await expect.poll(async () => page.locator("[data-world-z]").evaluateAll((nodes) => {
+    const depths = nodes.map((node) => Number((node as HTMLElement).dataset.worldZ));
+    return Math.max(...depths) - Math.min(...depths);
+  })).toBeGreaterThan(2);
+
+  const juliet = page.locator('[data-character-label="Juliet Capulet"]');
+  await page.getByRole("button", { name: "Select Juliet Capulet" }).click();
+  await expect(juliet).toHaveAttribute("data-space-origin", "true");
+  await expect(romeo).not.toHaveAttribute("data-space-origin", "true");
+  await expect.poll(async () => Math.abs(Number(await juliet.getAttribute("data-world-z")))).toBeLessThan(0.1);
 });
