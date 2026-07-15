@@ -27,7 +27,7 @@ test("keyboard and reduced-motion path preserves the complete 2D lesson", async 
   await expect(firstLesson).toBeFocused();
   await page.keyboard.press("Enter");
 
-  await page.getByRole("button", { name: /Start missions/ }).focus();
+  await page.getByRole("button", { name: "Enter the observatory" }).focus();
   await page.keyboard.press("Enter");
   await expect(page.getByRole("status")).toContainText("3D is unavailable");
   await expect(page.getByLabel("2D relationship list")).toBeVisible();

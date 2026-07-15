@@ -8,7 +8,7 @@ async function checkAndContinue(page: Page) {
 
 test("Romeo and Juliet judge path compares characters and explains a turning point", async ({ page }) => {
   await page.goto("/learn/romeo-and-juliet");
-  await page.getByRole("button", { name: /Start missions/ }).click();
+  await page.getByRole("button", { name: "Enter the observatory" }).click();
   await page.getByRole("button", { name: "2D list" }).click();
 
   await page.getByRole("button", { name: "Select Friar Laurence" }).click();

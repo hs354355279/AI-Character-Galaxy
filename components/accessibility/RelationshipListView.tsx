@@ -39,7 +39,7 @@ export function RelationshipListView({
                     className="character-list-button pressable"
                     type="button"
                     key={character.id}
-                    aria-label={`Select ${character.name}`}
+                    aria-label={`Inspect ${character.name} in 2D list`}
                     aria-pressed={selectedCharacterIds.includes(character.id)}
                     onClick={() => onSelectCharacter(character.id)}
                   >

@@ -10,7 +10,7 @@ test("French Revolution judge path reaches relationship discoveries", async ({ p
   await page.goto("/");
   const lessonCard = page.getByRole("article").filter({ hasText: "French Revolution" });
   await lessonCard.getByRole("link", { name: /Start exploration/ }).click();
-  await page.getByRole("button", { name: /Start missions/ }).click();
+  await page.getByRole("button", { name: "Enter the observatory" }).click();
   await page.getByRole("button", { name: "2D list" }).click();
 
   await page.getByRole("button", { name: "Select Maximilien Robespierre" }).click();

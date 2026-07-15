@@ -6,13 +6,16 @@ import { useEffect, useMemo, useState } from "react";
 import { RelationshipListView } from "@/components/accessibility/RelationshipListView";
 import { detectWebGL } from "@/components/accessibility/WebGLBoundary";
 import { GalaxyScene } from "@/components/galaxy/GalaxyScene";
-import { BrandMark } from "@/components/shared/BrandMark";
+import { ExhibitionHeader } from "@/components/navigation/ExhibitionHeader";
 import { AssessmentPanel } from "@/components/learning/AssessmentPanel";
+import { CharacterRail } from "@/components/learning/CharacterRail";
 import { EvidencePanel } from "@/components/learning/EvidencePanel";
 import { LearningSummary } from "@/components/learning/LearningSummary";
 import { LessonIntroduction } from "@/components/learning/LessonIntroduction";
 import { MissionPanel } from "@/components/learning/MissionPanel";
 import { evaluateMission, type MissionEvaluation } from "@/lib/missions/evaluate";
+import { createLandingLesson } from "@/lib/landing/lesson-view-model";
+import { getAllLessonPacks } from "@/lib/lessons/repository";
 import type { LessonPack } from "@/lib/lessons/schema";
 import {
   createLearningSession,
@@ -25,29 +28,43 @@ import {
 
 type ViewMode = "2d" | "3d";
 type Phase = "intro" | "explore" | "assessment" | "summary";
+const lessons = getAllLessonPacks().map(createLandingLesson);
 
 export function LearningExperience({
   lesson,
   initialView = "3d",
   initialSession,
   webglAvailable,
+  initialFocusCharacterId,
 }: {
   lesson: LessonPack;
   initialView?: ViewMode;
   initialSession?: LearningSession;
   webglAvailable?: boolean;
+  initialFocusCharacterId?: string;
 }) {
   const reduceMotion = useReducedMotion() ?? false;
   const available = useMemo(
     () => webglAvailable ?? detectWebGL(),
     [webglAvailable],
   );
-  const [phase, setPhase] = useState<Phase>(initialSession ? "explore" : "intro");
-  const [view, setView] = useState<ViewMode>(initialView === "3d" && !available ? "2d" : initialView);
-  const [session, setSession] = useState<LearningSession>(
-    initialSession ?? createLearningSession(lesson.id),
+  const validInitialFocus = lesson.characters.some(
+    (character) => character.id === initialFocusCharacterId,
+  )
+    ? initialFocusCharacterId ?? null
+    : null;
+  const [phase, setPhase] = useState<Phase>(
+    initialSession || validInitialFocus ? "explore" : "intro",
   );
-  const [sessionReady, setSessionReady] = useState(Boolean(initialSession));
+  const [view, setView] = useState<ViewMode>(initialView === "3d" && !available ? "2d" : initialView);
+  const [session, setSession] = useState<LearningSession>(() => {
+    if (initialSession) return initialSession;
+    const created = createLearningSession(lesson.id);
+    return validInitialFocus
+      ? updateLearningSession(created, { visitedCharacterIds: [validInitialFocus] })
+      : created;
+  });
+  const [sessionReady, setSessionReady] = useState(Boolean(initialSession || validInitialFocus));
   const [explorationFinished, setExplorationFinished] = useState(
     Boolean(
       initialSession &&
@@ -59,9 +76,11 @@ export function LearningExperience({
     lesson.missions.findIndex((mission) => !session.completedMissionIds.includes(mission.id)),
   );
   const [missionIndex, setMissionIndex] = useState(firstIncomplete);
-  const [selectedCharacterIds, setSelectedCharacterIds] = useState<string[]>([]);
+  const [selectedCharacterIds, setSelectedCharacterIds] = useState<string[]>(
+    validInitialFocus ? [validInitialFocus] : [],
+  );
   const [selectedRelationshipIds, setSelectedRelationshipIds] = useState<string[]>([]);
-  const [focusedCharacterId, setFocusedCharacterId] = useState<string | null>(null);
+  const [focusedCharacterId, setFocusedCharacterId] = useState<string | null>(validInitialFocus);
   const [focusedRelationshipId, setFocusedRelationshipId] = useState<string | null>(null);
   const [writtenResponse, setWrittenResponse] = useState("");
   const [evaluation, setEvaluation] = useState<MissionEvaluation | null>(null);
@@ -74,7 +93,7 @@ export function LearningExperience({
   const hintId = `${mission?.id ?? "none"}:0`;
 
   useEffect(() => {
-    if (initialSession || typeof window === "undefined") return;
+    if (initialSession || validInitialFocus || typeof window === "undefined") return;
     const restored = loadLearningSession(lesson.id, window.sessionStorage);
     const hasProgress =
       restored.visitedCharacterIds.length > 0 ||
@@ -98,7 +117,7 @@ export function LearningExperience({
     return () => {
       active = false;
     };
-  }, [initialSession, lesson.id, lesson.missions]);
+  }, [initialSession, lesson.id, lesson.missions, validInitialFocus]);
 
   useEffect(() => {
     if (sessionReady && typeof window !== "undefined") {
@@ -166,7 +185,7 @@ export function LearningExperience({
   };
 
   if (phase === "intro") {
-    return <main className="site-shell"><LessonIntroduction lesson={lesson} onStart={() => setPhase("explore")} /></main>;
+    return <main className="lesson-introduction-shell"><LessonIntroduction lesson={lesson} onStart={() => setPhase("explore")} /></main>;
   }
   if (phase === "assessment") return <main><AssessmentPanel lesson={lesson} session={session} onFinish={finishAssessment} /></main>;
   if (phase === "summary") return <main><LearningSummary lesson={lesson} session={session} /></main>;
@@ -176,18 +195,27 @@ export function LearningExperience({
 
   return (
     <main className="learning-workspace">
-      <header className="learning-header glass-material">
-        <BrandMark />
-        <div className="lesson-breadcrumb"><span>{lesson.kind}</span><strong>{lesson.title}</strong></div>
-        <div className="workspace-actions">
+      <ExhibitionHeader
+        lessons={lessons}
+        currentLessonId={lesson.id}
+        theme="space"
+        indexLabel="Open observatory navigation"
+        actions={(
+          <div className="workspace-actions">
           <div className="view-toggle" role="group" aria-label="Galaxy view">
             <button type="button" aria-pressed={view === "3d"} disabled={!available} onClick={() => setView("3d")}>3D galaxy</button>
             <button type="button" aria-pressed={view === "2d"} onClick={() => setView("2d")}>2D list</button>
           </div>
           <button type="button" className="header-action" onClick={reset}>Reset</button>
           <Link className="header-action" href={`/sources/${lesson.slug}`}>Sources</Link>
-        </div>
-      </header>
+          </div>
+        )}
+      />
+      <div className="observatory-titlebar">
+        <span>{lesson.kind}</span>
+        <strong>{lesson.title}</strong>
+        <i>{lesson.characters.length} people · {lesson.relationships.length} relations</i>
+      </div>
       {!available && <div className="webgl-status" role="status">3D is unavailable on this device. The complete lesson is open in the 2D relationship list.</div>}
       {explorationFinished ? (
         <section className="missions-complete glass-material">
@@ -198,17 +226,25 @@ export function LearningExperience({
         </section>
       ) : (
         <div className="workspace-grid">
-          <motion.aside className="workspace-panel mission-panel glass-material" initial={reduceMotion ? false : { opacity: 0, x: -18 }} animate={{ opacity: 1, x: 0 }} transition={{ type: "spring", bounce: 0, duration: 0.38 }}>
+          <motion.aside className="workspace-panel mission-panel glass-material" initial={reduceMotion ? false : { x: -18 }} animate={{ x: 0 }} transition={{ type: "spring", bounce: 0, duration: 0.38 }}>
             <MissionPanel mission={mission} position={missionIndex + 1} total={lesson.missions.length} hint={visibleHint} hintUsed={session.usedHintIds.includes(hintId)} writtenResponse={writtenResponse} evaluation={evaluation} onHint={revealHint} onResponseChange={setWrittenResponse} onCheck={checkMission} onContinue={continueMission} />
           </motion.aside>
-          <section className="galaxy-viewport">
-            {view === "3d" && available ? (
-              <GalaxyScene lesson={lesson} selectedCharacterId={focusedCharacterId} selectedRelationshipIds={selectedRelationshipIds} highlightedRelationshipIds={mission.relevantRelationshipIds} reduceMotion={reduceMotion} onSelectCharacter={selectCharacter} onSelectRelationship={selectRelationship} />
-            ) : (
-              <RelationshipListView lesson={lesson} selectedCharacterIds={selectedCharacterIds} selectedRelationshipIds={selectedRelationshipIds} onSelectCharacter={selectCharacter} onSelectRelationship={selectRelationship} />
-            )}
-          </section>
-          <motion.aside className="workspace-panel evidence-panel glass-material" initial={reduceMotion ? false : { opacity: 0, x: 18 }} animate={{ opacity: 1, x: 0 }} transition={{ type: "spring", bounce: 0, duration: 0.38 }}>
+          <div className="observatory-stage">
+            <section className="galaxy-viewport">
+              {view === "3d" && available ? (
+                <GalaxyScene lesson={lesson} selectedCharacterId={focusedCharacterId} selectedRelationshipIds={selectedRelationshipIds} highlightedRelationshipIds={mission.relevantRelationshipIds} reduceMotion={reduceMotion} onSelectCharacter={selectCharacter} onSelectRelationship={selectRelationship} />
+              ) : (
+                <RelationshipListView lesson={lesson} selectedCharacterIds={selectedCharacterIds} selectedRelationshipIds={selectedRelationshipIds} onSelectCharacter={selectCharacter} onSelectRelationship={selectRelationship} />
+              )}
+            </section>
+            <CharacterRail
+              characters={lesson.characters}
+              groups={lesson.groups}
+              selectedCharacterId={focusedCharacterId}
+              onSelect={selectCharacter}
+            />
+          </div>
+          <motion.aside className="workspace-panel evidence-panel glass-material" initial={reduceMotion ? false : { x: 18 }} animate={{ x: 0 }} transition={{ type: "spring", bounce: 0, duration: 0.38 }}>
             <EvidencePanel
               lesson={lesson}
               character={focusedCharacter}

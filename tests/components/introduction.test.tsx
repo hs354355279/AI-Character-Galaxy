@@ -15,11 +15,14 @@ describe("LessonIntroduction", () => {
       />,
     );
 
-    expect(screen.getByText(/How did relationships and competing ideas/i)).toBeVisible();
+    expect(screen.getByRole("navigation", { name: "Primary navigation" })).toBeVisible();
+    expect(
+      screen.getByRole("heading", { name: /How did relationships and competing ideas/i }),
+    ).toBeVisible();
     expect(screen.getByRole("heading", { name: /learning objectives/i })).toBeVisible();
     expect(screen.getByText(/Solid lines show established relationships/i)).toBeVisible();
 
-    await user.click(screen.getByRole("button", { name: /start missions/i }));
+    await user.click(screen.getByRole("button", { name: "Enter the observatory" }));
     expect(onStart).toHaveBeenCalledOnce();
   });
 });

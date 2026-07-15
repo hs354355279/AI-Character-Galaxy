@@ -16,7 +16,7 @@ describe("LearningExperience", () => {
     const user = userEvent.setup();
     render(<LearningExperience lesson={lesson} initialView="2d" webglAvailable />);
 
-    await user.click(screen.getByRole("button", { name: /start missions/i }));
+    await user.click(screen.getByRole("button", { name: "Enter the observatory" }));
     expect(screen.getByRole("heading", { name: /find the jacobin leader/i })).toBeVisible();
 
     await user.click(screen.getByRole("button", { name: "Select Maximilien Robespierre" }));
@@ -27,7 +27,7 @@ describe("LearningExperience", () => {
   it("keeps a selected character synchronized when switching views", async () => {
     const user = userEvent.setup();
     render(<LearningExperience lesson={lesson} initialView="2d" webglAvailable />);
-    await user.click(screen.getByRole("button", { name: /start missions/i }));
+    await user.click(screen.getByRole("button", { name: "Enter the observatory" }));
     await user.click(screen.getByRole("button", { name: "Select Maximilien Robespierre" }));
     await user.click(screen.getByRole("button", { name: "3D galaxy" }));
 
@@ -38,7 +38,7 @@ describe("LearningExperience", () => {
   it("allows one built-in hint per mission", async () => {
     const user = userEvent.setup();
     render(<LearningExperience lesson={lesson} initialView="2d" webglAvailable />);
-    await user.click(screen.getByRole("button", { name: /start missions/i }));
+    await user.click(screen.getByRole("button", { name: "Enter the observatory" }));
 
     const hintButton = screen.getByRole("button", { name: /reveal hint/i });
     await user.click(hintButton);
@@ -67,5 +67,33 @@ describe("LearningExperience", () => {
     expect(screen.getByRole("heading", { name: /check your relationship model/i })).toBeVisible();
     await user.click(screen.getByRole("button", { name: /finish and see discoveries/i }));
     expect(screen.getByRole("heading", { name: /my relationship discoveries/i })).toBeVisible();
+  });
+
+  it("keeps every character directly selectable from the observatory rail", () => {
+    const active = createLearningSession(lesson.id, "2026-07-14T00:00:00.000Z");
+    render(
+      <LearningExperience
+        lesson={lesson}
+        initialSession={active}
+        initialView="2d"
+        webglAvailable={false}
+      />,
+    );
+
+    expect(screen.getByRole("navigation", { name: "Character selection" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Select Olympe de Gouges" })).toBeVisible();
+  });
+
+  it("opens a deep-linked character in the active observatory", () => {
+    render(
+      <LearningExperience
+        lesson={lesson}
+        initialFocusCharacterId="olympe-de-gouges"
+        initialView="2d"
+        webglAvailable={false}
+      />,
+    );
+
+    expect(screen.getByRole("heading", { name: "Olympe de Gouges" })).toBeVisible();
   });
 });

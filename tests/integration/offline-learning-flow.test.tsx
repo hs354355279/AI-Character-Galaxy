@@ -20,7 +20,7 @@ describe("offline learning flow", () => {
       />,
     );
 
-    await user.click(screen.getByRole("button", { name: /start missions/i }));
+    await user.click(screen.getByRole("button", { name: "Enter the observatory" }));
     expect(screen.getByRole("status")).toHaveTextContent(/3D is unavailable/i);
     expect(screen.getByRole("button", { name: "3D galaxy" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Select Friar Laurence" })).toBeVisible();

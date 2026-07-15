@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 async function startFrenchRevolution(page: import("@playwright/test").Page) {
   await page.goto("/learn/french-revolution");
-  await page.getByRole("button", { name: /Start missions/ }).click();
+  await page.getByRole("button", { name: "Enter the observatory" }).click();
 }
 
 test("a planet remains selectable when a relationship line crosses in front of it", async ({ page }) => {
