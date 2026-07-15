@@ -11,10 +11,13 @@ History and literature are often taught as isolated names, dates, and plot point
 ## What AI Character Galaxy does
 
 - Presents two complete English lesson packs: the French Revolution and *Romeo and Juliet*.
+- Frames the product as an orbital editorial exhibition with a shared navigation system, course register, and reviewed character atlas.
 - Synchronizes a spatial 3D galaxy with a fully equivalent, keyboard-accessible 2D relationship list.
+- Renders procedural shader planets, atmospheres, orbit rings, and deterministic particle fields while keeping a stable HTML character index for selection.
 - Guides learners through five deterministic missions per lesson: find, group, trace, compare, and explain cause-and-effect.
 - Keeps every official character, relationship, mission, question, and source inside a strict reviewed lesson schema.
 - Offers optional GPT-5.6 explanations that can reference only active lesson IDs and source IDs.
+- Provides a clearly separated, web-grounded GPT-5.6 research form for a learner-supplied historical or literary character name.
 - Finishes with five evidence-grounded comprehension prompts and a private relationship-discoveries summary.
 - Remains fully usable with no API key, no network, no account, and no WebGL.
 
@@ -43,11 +46,13 @@ The browser tests in [`e2e/`](e2e/) execute both paths end to end. The timed jud
 Requirements: Node.js 20+ and npm.
 
 ```powershell
+cd G:\YSF_Digital\project\Devposts
 npm install
+Copy-Item .env.example .env.local
 npm run dev
 ```
 
-Open `http://127.0.0.1:3000`. An OpenAI key is optional for the complete judged learning flow.
+Open `http://localhost:3000`. Leave `OPENAI_API_KEY` empty to run the complete reviewed learning flow without live AI. Add a server-side key only when live GPT-5.6 explanations or custom character research are desired.
 
 Production check:
 
@@ -55,6 +60,17 @@ Production check:
 npm run build
 npm start
 ```
+
+## Experience routes
+
+| Route | Purpose |
+| --- | --- |
+| `/` | Animated orbital exhibition landing page. |
+| `/courses` | Full-screen course register with direct lesson entry. |
+| `/characters` | Searchable reviewed character atlas plus optional custom GPT-5.6 research. |
+| `/learn/french-revolution` | French Revolution introduction and active learning observatory. |
+| `/learn/romeo-and-juliet` | *Romeo and Juliet* introduction and active learning observatory. |
+| `/sources/[lessonId]` | Reviewed source, attribution, and evidence register. |
 
 ## Environment
 
@@ -74,10 +90,11 @@ The application treats AI as an enhancement, not a dependency. Without `OPENAI_A
 
 ## GPT-5.6 usage
 
-GPT-5.6 is used in two controlled places:
+GPT-5.6 is used in three controlled places:
 
 1. **Runtime learning enhancements.** Server routes use the OpenAI Responses API with Zod Structured Outputs to create age-appropriate explanations, five-question checks, and learning summaries. Prompts contain only reviewed lesson facts and IDs. Every returned source, entity, and relationship ID is checked again against the active pack before the response reaches React.
-2. **Candidate content pipeline.** A CLI reads only manifest-approved normalized excerpts and can ask GPT-5.6 for a candidate lesson pack. The generator requires a `.candidate.json` output outside the official lesson directory, refuses overwrite, and requires schema validation plus human review before publication.
+2. **Custom character research.** `POST /api/characters/query` accepts only a bounded character name, requires web search, validates a compact structured profile, and displays source links next to the generated result. Generated profiles remain visually and semantically separate from the reviewed atlas and never modify lesson packs.
+3. **Candidate content pipeline.** A CLI reads only manifest-approved normalized excerpts and can ask GPT-5.6 for a candidate lesson pack. The generator requires a `.candidate.json` output outside the official lesson directory, refuses overwrite, and requires schema validation plus human review before publication.
 
 Calls use low reasoning effort, bounded timeouts, at most one retry, and a SHA-256-derived anonymous `safety_identifier`. Invalid output, unknown references, missing configuration, timeouts, and network failures all return reviewed prepared content. GPT output never overwrites an official pack.
 
@@ -156,7 +173,7 @@ That command runs ESLint, Vitest, content validation, TypeScript, and the optimi
 npm run test:e2e
 ```
 
-Coverage includes schema integrity, cross-reference safety, deterministic layout, mission evaluation, session recovery, OpenAI fallback and source-ID rejection, API input validation, design components, offline learning, keyboard navigation, reduced motion, responsive layout, forced WebGL failure, and both complete judge journeys.
+Coverage includes schema integrity, cross-reference safety, deterministic layout and particle budgets, mission evaluation, session recovery, OpenAI fallback and source-ID rejection, custom character research, API input validation, design components, offline learning, keyboard navigation, reduced motion, responsive layout, forced WebGL failure, stable 3D planet interaction, and both complete judge journeys.
 
 ## Codex-assisted development
 

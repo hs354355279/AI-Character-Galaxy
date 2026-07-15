@@ -17,6 +17,7 @@ flowchart LR
   R --> S["Shared learning state"]
   S --> V3["3D galaxy"]
   S --> V2["2D relationship list"]
+  S --> CR["Stable character index"]
   S --> E["Local mission evaluator"]
   S --> SS["Session storage"]
   S --> A["Optional learning API"]
@@ -43,11 +44,19 @@ flowchart LR
 - `lib/session/learning-session.ts` validates, deduplicates, saves, and restores same-tab progress.
 - `components/learning/LearningExperience.tsx` owns the shared selection state used by both visualizations.
 
-The 2D list is not a simplified emergency page. It exposes the same people, relationship types, direction, disputed labels, evidence selection, mission actions, and learning outcomes as the canvas.
+The 2D list is not a simplified emergency page. It exposes the same people, relationship types, direction, disputed labels, evidence selection, mission actions, and learning outcomes as the canvas. The always-available character index owns selection independently of projected WebGL labels, so camera depth and decorative layers cannot block a person.
+
+### Exhibition and motion layer
+
+- `components/navigation/ExhibitionHeader.tsx` provides one navigation language across the landing page, course register, character atlas, and lessons.
+- `components/motion/SmoothScroll.tsx` is the single Lenis owner and connects one request-animation-frame source to GSAP and ScrollTrigger.
+- Reduced-motion and coarse-pointer environments retain native scrolling and remove nonessential entrance transforms.
+- The galaxy uses deterministic particles, bounded device-pixel ratios, procedural shader materials, and invisible hit spheres with explicit interaction metadata. Projected labels and particle fields never receive pointer input.
+- The generated observatory artwork is a static visual layer; WebGL planets remain procedural, responsive, and selectable.
 
 ### GPT-5.6 enhancement layer
 
-The three server-only endpoints are:
+The three lesson server-only endpoints are:
 
 - `POST /api/learning/explain`
 - `POST /api/learning/assessment`
@@ -64,6 +73,10 @@ Processing sequence:
 7. Return `{ source: "gpt-5.6", data }` or the same validated data shape with `source: "prepared"`.
 
 At most two model attempts are made. A missing key, network exception, timeout, refusal, malformed result, or unknown reference selects the prepared fallback. No raw model string is written into React state.
+
+### Custom character research boundary
+
+`POST /api/characters/query` is intentionally separate from reviewed lessons. It accepts a bounded character name, calls GPT-5.6 through the Responses API with required web search, validates the resulting profile with Zod, and returns visible citations. Requests use a hashed anonymous safety identifier, a twenty-second timeout, and one bounded retry. Invalid input returns `400`, a refusal or unresolved person returns `422`, upstream failure returns `502`, and missing server configuration returns `503`. Generated profiles are labeled as AI research, stay in transient UI state, and cannot become lesson evidence or alter reviewed directory entries.
 
 ## Privacy and under-18 boundary
 
@@ -87,6 +100,7 @@ The generator cannot overwrite existing candidates or official packs.
 | Failure | Controlled behavior |
 | --- | --- |
 | No OpenAI key/network | Prepared explanations, questions, hints, and summaries; core flow unchanged. |
+| No key for custom research | Reviewed character atlas remains available; the research form reports that server configuration is required. |
 | Invalid model reference | Bounded retry, then prepared fallback. |
 | WebGL unavailable | Announced 2D list with shared lesson state. |
 | Corrupt stored session | Fresh validated local session. |
@@ -97,10 +111,10 @@ The generator cannot overwrite existing candidates or official packs.
 ## Verification layers
 
 - Content: schema, referential integrity, evidence, locators, objective coverage, provenance manifests, review reports.
-- Unit: deterministic layout, mission rules, session validation, OpenAI output and ID rejection.
+- Unit: deterministic layout and visual budgets, mission rules, session validation, OpenAI output and ID rejection.
 - Component: Apple-inspired discovery surfaces, introduction, source cards, 2D/3D state, offline path, AI fallback card.
 - API integration: strict input, no-key fallback, privacy-safe safety identifier.
-- Browser: both complete lessons plus keyboard, reduced-motion, phone viewport, and forced WebGL failure.
+- Browser: exhibition navigation, character deep links and research, both complete lessons, stable planet selection, keyboard, reduced-motion, phone viewport, and forced WebGL failure.
 - Production: ESLint, TypeScript, and optimized Next.js build.
 
 ## Extension points
