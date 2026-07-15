@@ -40,11 +40,28 @@ flowchart LR
 ### Deterministic learning engine
 
 - `lib/layout/galaxy-layout.ts` produces a repeatable layout from the pack seed.
+- `lib/layout/relationship-space.ts` derives a deterministic target-centered coordinate system from reviewed relationship types, strengths, directions, and learning tags.
+- `lib/layout/relationship-transition.ts` owns the mutable display vectors used by every 3D consumer; one frame controller damps those vectors toward the latest semantic targets.
 - `lib/missions/evaluate.ts` checks mission evidence locally; no model grades the learner.
 - `lib/session/learning-session.ts` validates, deduplicates, saves, and restores same-tab progress.
 - `components/learning/LearningExperience.tsx` owns the shared selection state used by both visualizations.
 
 The 2D list is not a simplified emergency page. It exposes the same people, relationship types, direction, disputed labels, evidence selection, mission actions, and learning outcomes as the canvas. The always-available character index owns selection independently of projected WebGL labels, so camera depth and decorative layers cannot block a person.
+
+#### Target-centered relationship space
+
+Selecting a character reorganizes the galaxy around a stable origin rather than moving the camera to a planet. The semantic coordinates are fixed and explainable:
+
+- Radius represents relational proximity. Direct, stronger ties sit nearest the selected person; second-degree and contextual people occupy progressively wider shells.
+- Vertical position represents relationship valence. Affinity, loyalty, mentorship, and romance rise; conflict, rivalry, betrayal, and violence fall.
+- Depth represents context. Personal, family, and private ties sit toward the viewer; public, political, and institutional ties recede.
+- Lateral position represents relationship direction. Incoming and outgoing influence use opposing sides, with deterministic seeded lanes preventing collisions.
+
+Breadth-first graph distance defines direct, second-degree, and contextual layers. Reviewed `relationship.type`, `strength`, `direction`, and `learningTags` provide the semantic scores; no runtime model call participates in layout. The selected character is exactly `[0, 0, 0]`, all other coordinates are stable for the same pack and target, and collision separation is deterministic.
+
+`RelationshipSpaceController` updates the shared `THREE.Vector3` store once per frame. Planets copy those vectors, relationship geometry rewrites its endpoints, pulses interpolate along them, and HTML labels project them. This single position authority prevents lines and labels from lagging behind the planets. Reduced-motion mode snaps directly to target coordinates. Orbit controls remain centered on the origin, eliminating selection-driven camera jumps.
+
+On desktop, the observatory owns one viewport and the mission, galaxy, character index, and evidence panels manage their own bounded content. Tablet and phone layouts return to normal document flow. The canvas has no independent vertical scroll range, while the character index retains deliberate horizontal scrolling.
 
 ### Exhibition and motion layer
 

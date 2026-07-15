@@ -13,6 +13,7 @@ History and literature are often taught as isolated names, dates, and plot point
 - Presents two complete English lesson packs: the French Revolution and *Romeo and Juliet*.
 - Frames the product as an orbital editorial exhibition with a shared navigation system, course register, and reviewed character atlas.
 - Synchronizes a spatial 3D galaxy with a fully equivalent, keyboard-accessible 2D relationship list.
+- Re-centers the 3D relationship space on the selected person: distance expresses relationship strength, height expresses affinity versus conflict, depth expresses personal versus public context, and lateral direction distinguishes incoming from outgoing influence.
 - Renders procedural shader planets, atmospheres, orbit rings, and deterministic particle fields while keeping a stable HTML character index for selection.
 - Guides learners through five deterministic missions per lesson: find, group, trace, compare, and explain cause-and-effect.
 - Keeps every official character, relationship, mission, question, and source inside a strict reviewed lesson schema.
@@ -173,7 +174,7 @@ That command runs ESLint, Vitest, content validation, TypeScript, and the optimi
 npm run test:e2e
 ```
 
-Coverage includes schema integrity, cross-reference safety, deterministic layout and particle budgets, mission evaluation, session recovery, OpenAI fallback and source-ID rejection, custom character research, API input validation, design components, offline learning, keyboard navigation, reduced motion, responsive layout, forced WebGL failure, stable 3D planet interaction, and both complete judge journeys.
+Coverage includes schema integrity, cross-reference safety, deterministic semantic 3D layout and particle budgets, damped target transitions, mission evaluation, session recovery, OpenAI fallback and source-ID rejection, custom character research, API input validation, design components, offline learning, keyboard navigation, reduced motion, responsive layout, forced WebGL failure, fixed-height desktop observatory behavior, stable 3D planet interaction, and both complete judge journeys.
 
 ## Codex-assisted development
 
