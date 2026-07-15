@@ -243,6 +243,11 @@ Required assets:
 1. `course-observatory-hero.png` — a wide, premium orbital installation used behind course introductions.
 2. `planet-material-study.png` — a square material study showing layered mineral, paper, lacquer, and atmospheric planet surfaces used as the implementation reference.
 
+| Asset | Dimensions | File size | Built-in generation prompt summary |
+| --- | --- | --- | --- |
+| `public/images/learning/course-observatory-hero.png` | 1672 × 941 | 2,210,288 bytes | Sculptural orbital observatory in dark ink space with Japanese editorial materials and copy-safe negative space |
+| `public/images/learning/planet-material-study.png` | 1254 × 1254 | 2,364,318 bytes | Four paper, violet mineral, coral lacquer, and cyan ceramic planet material studies with restrained atmosphere rims |
+
 Visual constraints:
 
 - Japanese editorial studio restraint.
