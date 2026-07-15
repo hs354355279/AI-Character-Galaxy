@@ -49,3 +49,23 @@ test("the character rail drives repeated camera focus without runtime errors", a
 
   expect(pageErrors).toEqual([]);
 });
+
+test("desktop observatory owns one viewport without document scrolling", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/learn/romeo-and-juliet?focus=romeo");
+  await expect(page.locator('[data-character-label="Romeo Montague"]')).toHaveAttribute(
+    "data-projection-ready",
+    "true",
+  );
+
+  const before = await page.evaluate(() => ({
+    y: scrollY,
+    client: document.documentElement.clientHeight,
+    scroll: document.documentElement.scrollHeight,
+  }));
+  expect(before.scroll).toBeLessThanOrEqual(before.client + 1);
+
+  await page.locator(".galaxy-canvas").hover();
+  await page.mouse.wheel(0, 600);
+  expect(await page.evaluate(() => scrollY)).toBe(before.y);
+});

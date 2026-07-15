@@ -2674,6 +2674,44 @@ button {
   }
 }
 
+@media (min-width: 1181px) {
+  .learning-workspace {
+    height: 100svh;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .learning-workspace .workspace-grid {
+    height: calc(100svh - 7.8rem);
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .observatory-stage {
+    height: 100%;
+    min-height: 0;
+    grid-template-rows: minmax(0, 1fr) auto;
+    overflow: hidden;
+  }
+
+  .learning-workspace .workspace-panel,
+  .learning-workspace .galaxy-viewport {
+    min-height: 0;
+    height: 100%;
+  }
+
+  .learning-workspace .workspace-panel {
+    position: relative;
+    top: auto;
+    overscroll-behavior: contain;
+  }
+
+  .galaxy-canvas {
+    overscroll-behavior: none;
+    touch-action: none;
+  }
+}
+
 /* Reviewed character atlas */
 .character-atlas-page {
   --atlas-paper: #eeece5;
