@@ -1,3 +1,7 @@
+"use client";
+
+import { SectionTitle } from "./SectionTitle";
+
 const safeguards = [
   ["01", "Evidence first", "Every official relationship includes a source."],
   ["02", "Works offline", "Prepared missions and checks stay available."],
@@ -35,6 +39,3 @@ export function EvidenceManifesto() {
     </>
   );
 }
-"use client";
-
-import { SectionTitle } from "./SectionTitle";

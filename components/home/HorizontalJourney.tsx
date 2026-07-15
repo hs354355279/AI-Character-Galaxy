@@ -1,3 +1,14 @@
+"use client";
+
+import { useRef } from "react";
+import {
+  canAnimateLanding,
+  gsap,
+  ScrollTrigger,
+  useGSAP,
+} from "@/animations/landingMotion";
+import { SectionTitle } from "./SectionTitle";
+
 const steps = [
   {
     number: "01",
@@ -18,11 +29,12 @@ const steps = [
 
 export function HorizontalJourney() {
   const root = useRef<HTMLElement>(null);
+  const viewport = useRef<HTMLDivElement>(null);
   const track = useRef<HTMLDivElement>(null);
 
   useGSAP(
     () => {
-      if (!canAnimateLanding() || !root.current || !track.current) return;
+      if (!canAnimateLanding() || !root.current || !viewport.current || !track.current) return;
 
       const media = gsap.matchMedia();
       media.add(
@@ -35,7 +47,7 @@ export function HorizontalJourney() {
             x: () => -distance(),
             ease: "none",
             scrollTrigger: {
-              trigger: root.current,
+              trigger: viewport.current,
               start: "top top",
               end: () => `+=${distance() + window.innerHeight}`,
               pin: true,
@@ -70,7 +82,7 @@ export function HorizontalJourney() {
           title="Read relationships in three movements."
         />
       </div>
-      <div className="journey-viewport">
+      <div ref={viewport} className="journey-viewport">
         <div ref={track} className="journey-track">
           {steps.map((step) => (
             <article className="journey-panel" key={step.number}>
@@ -87,13 +99,3 @@ export function HorizontalJourney() {
     </section>
   );
 }
-"use client";
-
-import { useRef } from "react";
-import {
-  canAnimateLanding,
-  gsap,
-  ScrollTrigger,
-  useGSAP,
-} from "@/animations/landingMotion";
-import { SectionTitle } from "./SectionTitle";
