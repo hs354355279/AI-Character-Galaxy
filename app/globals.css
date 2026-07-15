@@ -894,11 +894,17 @@ button {
   inset: 0;
   width: 100%;
   height: 100%;
-  fill: var(--lesson-accent);
+  fill: none;
   stroke: rgba(243, 241, 234, 0.35);
   stroke-width: 1;
   mix-blend-mode: screen;
   pointer-events: none;
+}
+
+.orbit-overlay circle {
+  fill: var(--lesson-accent);
+  stroke: none;
+  opacity: 0.64;
 }
 
 .evidence-manifesto {

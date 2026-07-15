@@ -43,6 +43,7 @@ export function ExhibitionNav() {
     if (!open) return;
 
     const previousOverflow = document.body.style.overflow;
+    const trigger = triggerRef.current;
     document.body.style.overflow = "hidden";
     dialogRef.current?.querySelector<HTMLElement>("a, button")?.focus();
 
@@ -73,7 +74,7 @@ export function ExhibitionNav() {
     return () => {
       document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", onKeyDown);
-      triggerRef.current?.focus();
+      trigger?.focus();
     };
   }, [open]);
 

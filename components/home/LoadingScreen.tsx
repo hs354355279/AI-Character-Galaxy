@@ -15,13 +15,15 @@ export function LoadingScreen() {
   const [state, setState] = useState<CurtainState>("pending");
 
   useEffect(() => {
-    if (!canAnimateLanding() || sessionStorage.getItem(LANDING_INTRO_SESSION_KEY)) {
-      setState("done");
-      return;
-    }
+    const shouldPlay =
+      canAnimateLanding() && !sessionStorage.getItem(LANDING_INTRO_SESSION_KEY);
+    if (shouldPlay) sessionStorage.setItem(LANDING_INTRO_SESSION_KEY, "1");
 
-    sessionStorage.setItem(LANDING_INTRO_SESSION_KEY, "1");
-    setState("playing");
+    const frame = window.requestAnimationFrame(() => {
+      setState(shouldPlay ? "playing" : "done");
+    });
+
+    return () => window.cancelAnimationFrame(frame);
   }, []);
 
   useGSAP(

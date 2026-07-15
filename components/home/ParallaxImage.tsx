@@ -4,7 +4,7 @@ import Image, { type ImageProps } from "next/image";
 import { useRef } from "react";
 import { canAnimateLanding, gsap, useGSAP } from "@/animations/landingMotion";
 
-export function ParallaxImage(props: ImageProps) {
+export function ParallaxImage({ alt, ...props }: ImageProps) {
   const root = useRef<HTMLDivElement>(null);
   const image = useRef<HTMLImageElement>(null);
 
@@ -32,7 +32,7 @@ export function ParallaxImage(props: ImageProps) {
 
   return (
     <div ref={root} className="parallax-image">
-      <Image {...props} ref={image} />
+      <Image {...props} ref={image} alt={alt} />
     </div>
   );
 }

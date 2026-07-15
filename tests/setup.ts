@@ -22,11 +22,18 @@ Object.defineProperty(window, "matchMedia", {
 });
 
 class TestResizeObserver implements ResizeObserver {
-  constructor(_callback: ResizeObserverCallback) {}
+  constructor(callback: ResizeObserverCallback) {
+    void callback;
+  }
 
-  observe(_target: Element, _options?: ResizeObserverOptions) {}
+  observe(target: Element, options?: ResizeObserverOptions) {
+    void target;
+    void options;
+  }
 
-  unobserve(_target: Element) {}
+  unobserve(target: Element) {
+    void target;
+  }
 
   disconnect() {}
 }

@@ -8,16 +8,22 @@ test("desktop exhibition loads artwork and moves the learning method horizontall
   page,
 }) => {
   const consoleErrors: string[] = [];
+  const failedResources: string[] = [];
   page.on("console", (message) => {
     if (message.type() === "error") consoleErrors.push(message.text());
   });
+  page.on("response", (response) => {
+    if (response.status() >= 400) failedResources.push(response.url());
+  });
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/");
+  await page.waitForLoadState("networkidle");
 
   await expect(
     page.getByRole("heading", { name: /every person has a universe of relationships/i }),
   ).toBeVisible();
   await expect(page.locator(".hero-art img")).toHaveJSProperty("complete", true);
+  await expect(page.locator(".orbit-overlay ellipse").first()).toHaveCSS("fill", "none");
 
   await page.locator(".journey-section").scrollIntoViewIfNeeded();
   const initialTransform = await page.locator(".journey-track").evaluate(
@@ -36,6 +42,7 @@ test("desktop exhibition loads artwork and moves the learning method horizontall
     ),
   ).toBe(false);
   expect(consoleErrors).toEqual([]);
+  expect(failedResources).toEqual([]);
 });
 
 test("mobile reduced-motion mode remains a natural vertical document", async ({ page }) => {
