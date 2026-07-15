@@ -4,6 +4,14 @@ test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => sessionStorage.setItem("acg-landing-intro-seen", "1"));
 });
 
+test("desktop primary navigation retains the exhibition shell styling", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/");
+
+  await expect(page.locator(".exhibition-header")).toHaveCSS("position", "fixed");
+  await expect(page.locator(".exhibition-header-inner")).toHaveCSS("display", "grid");
+});
+
 test("desktop exhibition loads artwork and moves the learning method horizontally", async ({
   page,
 }) => {
