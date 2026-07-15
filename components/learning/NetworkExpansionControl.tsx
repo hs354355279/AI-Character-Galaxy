@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import {
   NetworkExpansionBatchSchema,
   type NetworkExpansionBatch,
@@ -43,6 +43,7 @@ export function NetworkExpansionControl({
 }) {
   const [state, setState] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
+  const statusId = useId();
 
   const expand = async () => {
     if (state === "loading" || disabledReason) return;
@@ -88,7 +89,12 @@ export function NetworkExpansionControl({
 
   const unavailable = disabledReason ?? "";
   return (
-    <section className="network-expansion" aria-label="AI relationship network expansion" data-state={state}>
+    <section
+      className="network-expansion"
+      aria-label="AI relationship network expansion"
+      aria-busy={state === "loading"}
+      data-state={state}
+    >
       <div className="network-expansion-heading">
         <span className="network-expansion-orbit" aria-hidden="true"><i /></span>
         <div>
@@ -100,13 +106,14 @@ export function NetworkExpansionControl({
         className="network-expansion-action pressable"
         type="button"
         disabled={state === "loading" || Boolean(disabledReason)}
+        aria-describedby={statusId}
         onClick={expand}
       >
         {state === "loading"
           ? "Researching verified relationships…"
           : "Expand relationship galaxy with GPT-5.6"}
       </button>
-      <p className="network-expansion-status" role="status" aria-live="polite">
+      <p id={statusId} className="network-expansion-status" role="status" aria-live="polite">
         {unavailable || message}
       </p>
     </section>

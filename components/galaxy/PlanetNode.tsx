@@ -43,6 +43,7 @@ export function PlanetNode({
   importance,
   position,
   selected,
+  expanded,
   animate,
   onSelect,
 }: {
@@ -51,6 +52,7 @@ export function PlanetNode({
   importance: number;
   position: THREE.Vector3;
   selected: boolean;
+  expanded: boolean;
   animate: boolean;
   onSelect: () => void;
 }) {
@@ -79,7 +81,7 @@ export function PlanetNode({
       rotation={[seed * 0.008, seed * 0.014, -0.16 + seed * 0.002]}
     >
       <mesh
-        userData={{ galaxyInteraction: "planet", characterId: id }}
+        userData={{ galaxyInteraction: "planet", characterId: id, provenance: expanded ? "ai-expanded" : "reviewed" }}
         onClick={(event) => { event.stopPropagation(); onSelect(); }}
         onPointerOver={() => { document.body.style.cursor = "pointer"; }}
         onPointerOut={() => { document.body.style.cursor = ""; }}
@@ -116,6 +118,18 @@ export function PlanetNode({
         <torusGeometry args={[size * 1.55, size * 0.035, 8, 64]} />
         <meshBasicMaterial color={color} transparent opacity={selected ? 0.9 : 0.36} depthWrite={false} />
       </mesh>
+      {expanded ? (
+        <mesh raycast={disableRaycast} rotation={[Math.PI / 2 - seed * 0.004, 0.35, 0]}>
+          <torusGeometry args={[size * 2.25, size * 0.026, 8, 72]} />
+          <meshBasicMaterial
+            color="#61c9b4"
+            blending={THREE.AdditiveBlending}
+            transparent
+            opacity={0.72}
+            depthWrite={false}
+          />
+        </mesh>
+      ) : null}
       <mesh raycast={disableRaycast} rotation={[Math.PI / 2 + seed * 0.006, 0, 0]}>
         <torusGeometry args={[size * 1.9, size * 0.012, 6, 64]} />
         <meshBasicMaterial color="#f4f0e7" transparent opacity={selected ? 0.7 : 0.12} depthWrite={false} />

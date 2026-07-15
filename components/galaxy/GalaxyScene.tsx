@@ -249,6 +249,7 @@ export function GalaxyScene({
                 importance={character.importance}
                 position={positions.get(character.id)!}
                 selected={selectedCharacterId === character.id}
+                expanded={character.provenance === "ai-expanded"}
                 animate={quality.animate}
                 onSelect={() => onSelectCharacter(character.id)}
               />
@@ -281,6 +282,7 @@ export function GalaxyScene({
               data-selected={selectedCharacterId === character.id ? "true" : undefined}
               data-space-origin={selectedCharacterId === character.id ? "true" : undefined}
               data-label-layer={semanticLayout?.points.get(character.id)?.layer ?? "overview"}
+              data-provenance={character.provenance}
               ref={(element) => {
                 if (element) labelElementsRef.current.set(character.id, element);
                 else labelElementsRef.current.delete(character.id);
