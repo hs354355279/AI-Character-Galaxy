@@ -14,7 +14,7 @@ export function LandingExperience({ lessons }: { lessons: LandingLesson[] }) {
     <main id="top" className="home-page">
       <LoadingScreen />
       <SmoothScrollProvider />
-      <ExhibitionNav />
+      <ExhibitionNav lessons={lessons} />
       <Hero />
       <HorizontalJourney />
       <LessonShowcase lessons={lessons} />
