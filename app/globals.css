@@ -2342,6 +2342,334 @@ button {
   }
 }
 
+/* Reviewed character atlas */
+.character-atlas-page {
+  --atlas-paper: #eeece5;
+  --atlas-ink: #11110f;
+  min-height: 100vh;
+  color: var(--atlas-ink);
+  background: var(--atlas-paper);
+}
+
+.character-atlas-hero {
+  min-height: 92svh;
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(18rem, 0.5fr);
+  align-content: end;
+  gap: 3rem 5vw;
+  padding: 10rem 4vw 5rem;
+  border-bottom: 1px solid rgba(17, 17, 15, 0.25);
+}
+
+.character-atlas-hero > .editorial-kicker,
+.character-atlas-hero > h1 {
+  grid-column: 1 / -1;
+}
+
+.character-atlas-hero h1 {
+  max-width: 11ch;
+  margin: 0;
+  font-size: clamp(4.3rem, 10.5vw, 11rem);
+  font-weight: 560;
+  letter-spacing: -0.08em;
+  line-height: 0.82;
+}
+
+.character-atlas-hero > div {
+  grid-column: 2;
+  display: grid;
+  gap: 1.6rem;
+}
+
+.character-atlas-hero > div p {
+  margin: 0;
+  color: #5e5c56;
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+
+.character-atlas-hero > div span {
+  font-size: 0.68rem;
+  font-weight: 760;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.character-atlas-directory {
+  padding: 8rem 4vw;
+}
+
+.character-atlas-toolbar {
+  display: grid;
+  grid-template-columns: minmax(14rem, 0.55fr) minmax(0, 1.45fr);
+  gap: 4vw;
+  align-items: end;
+  padding-bottom: 3rem;
+}
+
+.character-atlas-toolbar > div > p,
+.character-filters label > span,
+.character-result-count {
+  font-size: 0.68rem;
+  font-weight: 760;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.character-atlas-toolbar > div > p {
+  margin: 0 0 1.2rem;
+}
+
+.character-atlas-toolbar h2 {
+  margin: 0;
+  font-size: clamp(3rem, 5vw, 5.8rem);
+  font-weight: 560;
+  letter-spacing: -0.065em;
+  line-height: 0.9;
+}
+
+.character-filters {
+  display: grid;
+  grid-template-columns: minmax(16rem, 1fr) minmax(10rem, 0.55fr) minmax(10rem, 0.55fr);
+  gap: 1.2rem;
+}
+
+.character-filters label {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.character-filters input,
+.character-filters select {
+  width: 100%;
+  min-height: 3.4rem;
+  padding: 0.75rem 0;
+  color: var(--atlas-ink);
+  border: 0;
+  border-bottom: 1px solid rgba(17, 17, 15, 0.42);
+  border-radius: 0;
+  outline-offset: 3px;
+  background: transparent;
+}
+
+.character-filters input {
+  font-size: 1.05rem;
+}
+
+.character-result-count {
+  margin: 0;
+  padding: 1rem 0;
+  border-top: 1px solid rgba(17, 17, 15, 0.25);
+}
+
+.character-atlas-list {
+  border-bottom: 1px solid rgba(17, 17, 15, 0.25);
+}
+
+.character-atlas-row {
+  --character-accent: #9a86d8;
+  min-height: 11rem;
+  display: grid;
+  grid-template-columns: 2.5rem 3.2rem minmax(13rem, 0.8fr) minmax(18rem, 1.25fr) minmax(12rem, 0.55fr);
+  gap: 1.4rem;
+  align-items: center;
+  padding: 2rem 0;
+  border-top: 1px solid rgba(17, 17, 15, 0.25);
+  transition:
+    padding 500ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 350ms ease;
+}
+
+.character-atlas-row:hover {
+  padding-right: 1.2rem;
+  padding-left: 1.2rem;
+  background: rgba(255, 255, 255, 0.38);
+}
+
+.character-atlas-number {
+  color: #77736b;
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.character-atlas-row > i {
+  width: 3rem;
+  height: 3rem;
+  display: grid;
+  place-items: center;
+  color: #11110f;
+  border-radius: 50%;
+  background: var(--character-accent);
+  font-size: 0.78rem;
+  font-style: normal;
+  font-weight: 820;
+  transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.character-atlas-row:hover > i {
+  transform: rotate(12deg) scale(1.08);
+}
+
+.character-atlas-identity p,
+.character-atlas-identity h3,
+.character-atlas-summary {
+  margin: 0;
+}
+
+.character-atlas-identity {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.character-atlas-identity p,
+.character-atlas-identity > span {
+  color: #77736b;
+  font-size: 0.67rem;
+}
+
+.character-atlas-identity p {
+  font-weight: 740;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.character-atlas-identity h3 {
+  font-size: clamp(1.35rem, 2vw, 2.15rem);
+  font-weight: 620;
+  letter-spacing: -0.04em;
+}
+
+.character-atlas-summary {
+  color: #56534d;
+  line-height: 1.65;
+}
+
+.character-atlas-links {
+  display: grid;
+  justify-items: end;
+  gap: 0.8rem;
+  font-size: 0.72rem;
+  font-weight: 760;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.character-atlas-links a:first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.character-atlas-links a span {
+  transition: transform 350ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.character-atlas-links a:hover span {
+  transform: translate3d(6px, -4px, 0);
+}
+
+.character-atlas-links a:last-child {
+  color: #77736b;
+  text-decoration: underline;
+  text-underline-offset: 0.25rem;
+}
+
+.character-atlas-empty {
+  display: grid;
+  justify-items: start;
+  gap: 1rem;
+  padding: 6rem 0;
+  border-top: 1px solid rgba(17, 17, 15, 0.25);
+}
+
+.character-atlas-empty h3 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 4rem);
+  font-weight: 560;
+  letter-spacing: -0.05em;
+}
+
+.character-atlas-empty button {
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid;
+  background: transparent;
+  cursor: pointer;
+}
+
+@media (max-width: 980px) {
+  .character-atlas-hero,
+  .character-atlas-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .character-atlas-hero > div,
+  .character-atlas-hero > .editorial-kicker,
+  .character-atlas-hero > h1 {
+    grid-column: 1;
+  }
+
+  .character-filters {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .character-search {
+    grid-column: 1 / -1;
+  }
+
+  .character-atlas-row {
+    grid-template-columns: 2.5rem 3.2rem 1fr auto;
+  }
+
+  .character-atlas-summary {
+    grid-column: 3 / -1;
+  }
+
+  .character-atlas-links {
+    grid-column: 3 / -1;
+    grid-row: 3;
+    justify-items: start;
+  }
+}
+
+@media (max-width: 640px) {
+  .character-atlas-hero {
+    min-height: 82svh;
+    padding: 8rem 1.2rem 3rem;
+  }
+
+  .character-atlas-hero h1 {
+    font-size: clamp(4rem, 19vw, 6rem);
+  }
+
+  .character-atlas-directory {
+    padding: 6rem 1.2rem;
+  }
+
+  .character-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .character-search {
+    grid-column: 1;
+  }
+
+  .character-atlas-row {
+    grid-template-columns: 2rem 2.8rem 1fr;
+    gap: 1rem;
+  }
+
+  .character-atlas-row > i {
+    width: 2.6rem;
+    height: 2.6rem;
+  }
+
+  .character-atlas-summary,
+  .character-atlas-links {
+    grid-column: 3;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .lesson-intro-art img,
   .lesson-intro-orbit,
