@@ -36,3 +36,24 @@ test("the global index keeps light text on its ink background from paper pages",
     "rgb(243, 241, 234)",
   );
 });
+
+test("lesson sources preserve the exhibition shell and return to the active character", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/learn/french-revolution?focus=olympe-de-gouges");
+  await page.getByRole("link", { name: "Sources", exact: true }).click();
+
+  await expect(page).toHaveURL(/\/sources\/french-revolution\?returnTo=/);
+  const navigation = page.getByRole("navigation", { name: "Primary navigation" });
+  await expect(navigation).toBeVisible();
+  await expect(navigation.getByRole("link", { name: "Exhibition" })).toBeVisible();
+  await expect(navigation.getByRole("link", { name: "Courses" })).toBeVisible();
+  await expect(navigation.getByRole("link", { name: "Characters" })).toBeVisible();
+
+  const sourcePage = page.locator("main.sources-page");
+  await expect(sourcePage).toHaveCSS("background-color", "rgb(238, 236, 229)");
+  await expect(sourcePage).toHaveCSS("color", "rgb(17, 17, 15)");
+
+  await navigation.getByRole("link", { name: "Return to lesson" }).click();
+  await expect(page).toHaveURL(/\/learn\/french-revolution\?focus=olympe-de-gouges$/);
+  await expect(page.getByRole("heading", { name: "Olympe de Gouges", exact: true })).toBeVisible();
+});

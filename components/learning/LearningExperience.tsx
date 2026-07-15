@@ -255,6 +255,8 @@ export function LearningExperience({
 
   const focusedCharacter = runtimeGraph.characters.find((item) => item.id === focusedCharacterId) ?? null;
   const focusedRelationship = runtimeGraph.relationships.find((item) => item.id === focusedRelationshipId) ?? null;
+  const lessonReturnHref = `/learn/${lesson.slug}${focusedCharacterId ? `?focus=${encodeURIComponent(focusedCharacterId)}` : ""}`;
+  const sourcesHref = `/sources/${lesson.slug}?returnTo=${encodeURIComponent(lessonReturnHref)}`;
 
   return (
     <main className="learning-workspace">
@@ -270,7 +272,7 @@ export function LearningExperience({
             <button type="button" aria-pressed={view === "2d"} onClick={() => setView("2d")}>2D list</button>
           </div>
           <button type="button" className="header-action" onClick={reset}>Reset</button>
-          <Link className="header-action" href={`/sources/${lesson.slug}`}>Sources</Link>
+          <Link className="header-action" href={sourcesHref}>Sources</Link>
           </div>
         )}
       />
