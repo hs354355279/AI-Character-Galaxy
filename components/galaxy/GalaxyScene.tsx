@@ -3,94 +3,29 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
-import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import * as THREE from "three";
-import {
-  createCameraFocusTransition,
-  sampleCameraFocusTransition,
-  type CameraVector,
-  type CameraFocusTransition,
-} from "@/lib/layout/camera-focus";
-import { createGalaxyLayout, type GalaxyPoint } from "@/lib/layout/galaxy-layout";
+import { createGalaxyLayout } from "@/lib/layout/galaxy-layout";
+import { createRelationshipSpace } from "@/lib/layout/relationship-space";
+import { createRelationshipPositionStore } from "@/lib/layout/relationship-transition";
 import { GalaxyParticles } from "@/components/galaxy/GalaxyParticles";
 import { PlanetNode } from "@/components/galaxy/PlanetNode";
 import { RelationshipField } from "@/components/galaxy/RelationshipField";
+import { RelationshipSpaceController } from "@/components/galaxy/RelationshipSpaceController";
 import { getGalaxyQuality } from "@/lib/galaxy/visual-quality";
 import type { LessonPack } from "@/lib/lessons/schema";
 
-const FOCUS_DURATION_SECONDS = 0.55;
-
-function toCameraVector(vector: THREE.Vector3): CameraVector {
-  return [vector.x, vector.y, vector.z];
-}
-
-function CameraFocus({
-  point,
-  reduceMotion,
-  controlsRef,
-}: {
-  point?: GalaxyPoint;
-  reduceMotion: boolean;
-  controlsRef: RefObject<OrbitControlsImpl | null>;
-}) {
-  const { camera } = useThree();
-  const transitionRef = useRef<CameraFocusTransition | null>(null);
-  const elapsedRef = useRef(0);
-
-  useEffect(() => {
-    const controls = controlsRef.current;
-    if (!point || !controls) {
-      transitionRef.current = null;
-      return;
-    }
-
-    const transition = createCameraFocusTransition(
-      toCameraVector(camera.position),
-      toCameraVector(controls.target),
-      [point.x, point.y, point.z],
-    );
-
-    if (reduceMotion) {
-      camera.position.fromArray(transition.toCamera);
-      controls.target.fromArray(transition.toTarget);
-      controls.update();
-      transitionRef.current = null;
-      return;
-    }
-
-    elapsedRef.current = 0;
-    transitionRef.current = transition;
-  }, [camera, controlsRef, point, reduceMotion]);
-
-  useFrame((_, delta) => {
-    const transition = transitionRef.current;
-    const controls = controlsRef.current;
-    if (!transition || !controls) return;
-
-    elapsedRef.current += Math.min(delta, 0.1);
-    const progress = Math.min(1, elapsedRef.current / FOCUS_DURATION_SECONDS);
-    const frame = sampleCameraFocusTransition(transition, progress);
-    camera.position.fromArray(frame.camera);
-    controls.target.fromArray(frame.target);
-    controls.update();
-
-    if (progress === 1) transitionRef.current = null;
-  });
-
-  return null;
-}
-
 interface GalaxyLabelPosition {
   id: string;
-  point: GalaxyPoint;
   offsetY: number;
 }
 
 function GalaxyLabelProjector({
   labels,
+  positions,
   elementsRef,
 }: {
   labels: GalaxyLabelPosition[];
+  positions: Map<string, THREE.Vector3>;
   elementsRef: RefObject<Map<string, HTMLElement>>;
 }) {
   const { camera, size } = useThree();
@@ -112,13 +47,14 @@ function GalaxyLabelProjector({
 
     for (const label of labels) {
       const element = elementsRef.current.get(label.id);
-      if (!element) continue;
+      const point = positions.get(label.id);
+      if (!element || !point) continue;
 
-      planetProjected.set(label.point.x, label.point.y, label.point.z).project(camera);
+      planetProjected.copy(point).project(camera);
       element.dataset.planetX = String((planetProjected.x * 0.5 + 0.5) * size.width);
       element.dataset.planetY = String((-planetProjected.y * 0.5 + 0.5) * size.height);
       element.dataset.projectionReady = "true";
-      world.set(label.point.x, label.point.y + label.offsetY, label.point.z);
+      world.set(point.x, point.y + label.offsetY, point.z);
       pointDirection.copy(world).sub(camera.position);
       projected.copy(world).project(camera);
 
@@ -203,7 +139,16 @@ export function GalaxyScene({
   onSelectCharacter: (id: string) => void;
   onSelectRelationship: (id: string) => void;
 }) {
-  const layout = useMemo(() => createGalaxyLayout(lesson), [lesson]);
+  const overviewLayout = useMemo(() => createGalaxyLayout(lesson), [lesson]);
+  const semanticLayout = useMemo(
+    () => selectedCharacterId ? createRelationshipSpace(lesson, selectedCharacterId) : null,
+    [lesson, selectedCharacterId],
+  );
+  const targetPoints = semanticLayout?.points ?? overviewLayout;
+  const positions = useMemo(
+    () => createRelationshipPositionStore(overviewLayout),
+    [overviewLayout],
+  );
   const [viewport, setViewport] = useState(() => ({
     width: typeof window === "undefined" ? 1280 : window.innerWidth,
     devicePixelRatio: typeof window === "undefined" ? 1 : window.devicePixelRatio,
@@ -220,15 +165,13 @@ export function GalaxyScene({
     () => getGalaxyQuality({ ...viewport, reducedMotion: reduceMotion }),
     [reduceMotion, viewport],
   );
-  const controlsRef = useRef<OrbitControlsImpl>(null);
   const labelElementsRef = useRef(new Map<string, HTMLElement>());
   const labels = useMemo(
     () => lesson.characters.map((character) => ({
       id: character.id,
-      point: layout.get(character.id)!,
       offsetY: 0.6 + character.importance * 0.08,
     })),
-    [layout, lesson.characters],
+    [lesson.characters],
   );
 
   return (
@@ -245,12 +188,17 @@ export function GalaxyScene({
           <pointLight position={[5, 8, 12]} intensity={16} color="#b8d7ff" />
           <pointLight position={[-9, -4, 3]} intensity={9} color="#e86c7b" />
           <GalaxyParticles quality={quality} seed={lesson.layoutSeed} />
+          <RelationshipSpaceController
+            positions={positions}
+            targets={targetPoints}
+            reduceMotion={reduceMotion}
+          />
           {lesson.relationships.map((relationship) => (
             <RelationshipField
               key={relationship.id}
               relationship={relationship}
-              from={layout.get(relationship.fromCharacterId)!}
-              to={layout.get(relationship.toCharacterId)!}
+              from={positions.get(relationship.fromCharacterId)!}
+              to={positions.get(relationship.toCharacterId)!}
               selected={selectedRelationshipIds.includes(relationship.id)}
               highlighted={highlightedRelationshipIds.includes(relationship.id)}
               animate={quality.animate}
@@ -265,16 +213,25 @@ export function GalaxyScene({
                 id={character.id}
                 color={group.color}
                 importance={character.importance}
-                point={layout.get(character.id)!}
+                position={positions.get(character.id)!}
                 selected={selectedCharacterId === character.id}
                 animate={quality.animate}
                 onSelect={() => onSelectCharacter(character.id)}
               />
             );
           })}
-          <OrbitControls ref={controlsRef} enablePan={false} enableDamping={!reduceMotion} minDistance={8} maxDistance={28} />
-          <CameraFocus point={selectedCharacterId ? layout.get(selectedCharacterId) : undefined} reduceMotion={reduceMotion} controlsRef={controlsRef} />
-          <GalaxyLabelProjector labels={labels} elementsRef={labelElementsRef} />
+          <OrbitControls
+            target={[0, 0, 0]}
+            enablePan={false}
+            enableDamping={!reduceMotion}
+            minDistance={8}
+            maxDistance={28}
+          />
+          <GalaxyLabelProjector
+            labels={labels}
+            positions={positions}
+            elementsRef={labelElementsRef}
+          />
         </Canvas>
       </div>
       <div className="galaxy-label-layer">

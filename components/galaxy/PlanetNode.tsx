@@ -3,7 +3,6 @@
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
-import type { GalaxyPoint } from "@/lib/layout/galaxy-layout";
 
 const vertexShader = `
   varying vec3 vNormal;
@@ -42,7 +41,7 @@ export function PlanetNode({
   id,
   color,
   importance,
-  point,
+  position,
   selected,
   animate,
   onSelect,
@@ -50,7 +49,7 @@ export function PlanetNode({
   id: string;
   color: string;
   importance: number;
-  point: GalaxyPoint;
+  position: THREE.Vector3;
   selected: boolean;
   animate: boolean;
   onSelect: () => void;
@@ -67,14 +66,16 @@ export function PlanetNode({
 
   useFrame(({ clock }, delta) => {
     if (surfaceRef.current) surfaceRef.current.uniforms.uTime.value = clock.elapsedTime;
-    if (animate && groupRef.current) groupRef.current.rotation.y += delta * (0.025 + seed * 0.00015);
+    if (groupRef.current) {
+      groupRef.current.position.copy(position);
+      if (animate) groupRef.current.rotation.y += delta * (0.025 + seed * 0.00015);
+    }
   });
 
   const disableRaycast = () => undefined;
   return (
     <group
       ref={groupRef}
-      position={[point.x, point.y, point.z]}
       rotation={[seed * 0.008, seed * 0.014, -0.16 + seed * 0.002]}
     >
       <mesh
