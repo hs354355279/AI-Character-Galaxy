@@ -1,15 +1,19 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { LearningExperience } from "@/components/learning/LearningExperience";
 import { getLessonPack } from "@/lib/lessons/repository";
 import { createLearningSession } from "@/lib/session/learning-session";
+import { saveExpansionState, expansionStorageKey } from "@/lib/network-expansion/storage";
+import { maryExpansionBatch, maryExpansionState } from "@/tests/fixtures/network-expansion";
 
 vi.mock("@/components/galaxy/GalaxyScene", () => ({
   GalaxyScene: () => <div aria-label="Interactive 3D relationship galaxy" />,
 }));
 
 const lesson = getLessonPack("french-revolution")!;
+
+afterEach(() => vi.unstubAllGlobals());
 
 describe("LearningExperience", () => {
   it("starts the lesson and completes a local character mission", async () => {
@@ -114,5 +118,67 @@ describe("LearningExperience", () => {
     expect(screen.getByRole("navigation", { name: "People filmstrip" })).toBeVisible();
     expect(container.querySelector(".exhibition-header--paper")).not.toBeNull();
     expect(screen.getByRole("button", { name: "Check mission" })).toBeVisible();
+  });
+
+  it("shows selected details immediately and expands the graph without changing focus", async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      source: "gpt-5.6",
+      data: maryExpansionBatch,
+    }), { status: 200 })));
+    render(
+      <LearningExperience
+        lesson={lesson}
+        initialSession={createLearningSession(lesson.id, "2026-07-16T00:00:00.000Z")}
+        initialView="2d"
+        webglAvailable={false}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Select Olympe de Gouges" }));
+    expect(screen.getByRole("heading", { name: "Olympe de Gouges" })).toBeVisible();
+    expect(screen.getAllByText(/writer and rights advocate/i).length).toBeGreaterThan(0);
+    expect(screen.queryByRole("button", { name: /explain with gpt-5.6/i })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Expand relationship galaxy with GPT-5.6" }));
+
+    const mary = await screen.findByRole("button", { name: "Select Mary Wollstonecraft" });
+    expect(mary).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Olympe de Gouges" })).toBeVisible();
+    expect(screen.getByText("10 people · 13 links")).toBeVisible();
+    await user.click(mary);
+    expect(screen.getByRole("heading", { name: "Mary Wollstonecraft" })).toBeVisible();
+    expect(screen.getByText(/argued that women deserved education/i)).toBeVisible();
+    expect(screen.getByRole("link", { name: /mary wollstonecraft biography/i })).toHaveAttribute(
+      "href",
+      "https://example.org/wollstonecraft",
+    );
+  });
+
+  it("restores a valid expansion and ignores malformed session data", async () => {
+    saveExpansionState(maryExpansionState, window.sessionStorage);
+    const { unmount } = render(
+      <LearningExperience
+        lesson={lesson}
+        initialSession={createLearningSession(lesson.id, "2026-07-16T00:00:00.000Z")}
+        initialView="2d"
+        webglAvailable={false}
+      />,
+    );
+
+    expect(await screen.findByRole("button", { name: "Select Mary Wollstonecraft" })).toBeVisible();
+    unmount();
+
+    window.sessionStorage.setItem(expansionStorageKey(lesson.id), "not-json");
+    render(
+      <LearningExperience
+        lesson={lesson}
+        initialSession={createLearningSession(lesson.id, "2026-07-16T00:00:00.000Z")}
+        initialView="2d"
+        webglAvailable={false}
+      />,
+    );
+
+    expect(await screen.findByText("9 people · 12 links")).toBeVisible();
+    expect(screen.queryByRole("button", { name: "Select Mary Wollstonecraft" })).not.toBeInTheDocument();
   });
 });

@@ -21,7 +21,16 @@ import type { LessonPack } from "@/lib/lessons/schema";
 import {
   createEmptyExpansionState,
   createRuntimeRelationshipGraph,
+  mergeExpansionBatch,
 } from "@/lib/network-expansion/runtime-graph";
+import {
+  MAX_EXPANDED_CHARACTERS,
+  type NetworkExpansionBatch,
+} from "@/lib/network-expansion/schemas";
+import {
+  loadExpansionState,
+  saveExpansionState,
+} from "@/lib/network-expansion/storage";
 import {
   createLearningSession,
   loadLearningSession,
@@ -49,9 +58,11 @@ export function LearningExperience({
   initialFocusCharacterId?: string;
 }) {
   const reduceMotion = useReducedMotion() ?? false;
+  const [expansionState, setExpansionState] = useState(() => createEmptyExpansionState(lesson.id));
+  const [expansionReady, setExpansionReady] = useState(false);
   const runtimeGraph = useMemo(
-    () => createRuntimeRelationshipGraph(lesson, createEmptyExpansionState(lesson.id)),
-    [lesson],
+    () => createRuntimeRelationshipGraph(lesson, expansionState),
+    [expansionState, lesson],
   );
   const [available, setAvailable] = useState(webglAvailable ?? false);
   const [view, setView] = useState<ViewMode>(
@@ -152,6 +163,26 @@ export function LearningExperience({
     }
   }, [session, sessionReady]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    let active = true;
+    const restored = loadExpansionState(lesson.id, window.sessionStorage);
+    queueMicrotask(() => {
+      if (!active) return;
+      setExpansionState(restored);
+      setExpansionReady(true);
+    });
+    return () => {
+      active = false;
+    };
+  }, [lesson.id]);
+
+  useEffect(() => {
+    if (expansionReady && typeof window !== "undefined") {
+      saveExpansionState(expansionState, window.sessionStorage);
+    }
+  }, [expansionReady, expansionState]);
+
   const selectCharacter = (id: string) => {
     setFocusedCharacterId(id);
     setFocusedRelationshipId(null);
@@ -209,6 +240,11 @@ export function LearningExperience({
     setFocusedCharacterId(null);
     setFocusedRelationshipId(null);
     setEvaluation(null);
+    setExpansionState(createEmptyExpansionState(lesson.id));
+  };
+
+  const addExpansion = (batch: NetworkExpansionBatch) => {
+    setExpansionState((current) => mergeExpansionBatch(lesson, current, batch));
   };
 
   if (phase === "intro") {
@@ -217,8 +253,8 @@ export function LearningExperience({
   if (phase === "assessment") return <main><AssessmentPanel lesson={lesson} session={session} onFinish={finishAssessment} /></main>;
   if (phase === "summary") return <main><LearningSummary lesson={lesson} session={session} /></main>;
 
-  const focusedCharacter = lesson.characters.find((item) => item.id === focusedCharacterId) ?? null;
-  const focusedRelationship = lesson.relationships.find((item) => item.id === focusedRelationshipId) ?? null;
+  const focusedCharacter = runtimeGraph.characters.find((item) => item.id === focusedCharacterId) ?? null;
+  const focusedRelationship = runtimeGraph.relationships.find((item) => item.id === focusedRelationshipId) ?? null;
 
   return (
     <main className="learning-workspace">
@@ -290,9 +326,14 @@ export function LearningExperience({
           evidence={(
             <EvidencePanel
               lesson={lesson}
+              graph={runtimeGraph}
               character={focusedCharacter}
               relationship={focusedRelationship}
               sessionId={`${lesson.id}:${session.startedAt}`}
+              expansionDisabledReason={expansionState.characters.length >= MAX_EXPANDED_CHARACTERS
+                ? "Expansion limit reached for this session"
+                : undefined}
+              onExpanded={addExpansion}
             />
           )}
           characterIndex={(
