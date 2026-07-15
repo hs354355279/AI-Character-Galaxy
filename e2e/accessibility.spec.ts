@@ -3,7 +3,11 @@ import { expect, test } from "@playwright/test";
 test("keyboard and reduced-motion path preserves the complete 2D lesson", async ({ page }) => {
   await page.addInitScript(() => {
     const original = HTMLCanvasElement.prototype.getContext;
-    HTMLCanvasElement.prototype.getContext = function (contextId: string, ...args: unknown[]) {
+    HTMLCanvasElement.prototype.getContext = function (
+      this: HTMLCanvasElement,
+      contextId: string,
+      ...args: unknown[]
+    ) {
       if (contextId === "webgl" || contextId === "webgl2") return null;
       return original.call(this, contextId, ...(args as []));
     } as typeof HTMLCanvasElement.prototype.getContext;
