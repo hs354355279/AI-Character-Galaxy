@@ -259,7 +259,10 @@ export function LearningExperience({
   const sourcesHref = `/sources/${lesson.slug}?returnTo=${encodeURIComponent(lessonReturnHref)}`;
 
   return (
-    <main className="learning-workspace">
+    <main
+      className={`learning-workspace learning-workspace--${lesson.slug}`}
+      data-testid="learning-workspace"
+    >
       <ExhibitionHeader
         lessons={lessons}
         currentLessonId={lesson.id}

@@ -117,6 +117,9 @@ describe("LearningExperience", () => {
     expect(screen.getByRole("complementary", { name: "Evidence sheet" })).toBeVisible();
     expect(screen.getByRole("navigation", { name: "People filmstrip" })).toBeVisible();
     expect(container.querySelector(".exhibition-header--paper")).not.toBeNull();
+    expect(screen.getByTestId("learning-workspace")).toHaveClass(
+      "learning-workspace--french-revolution",
+    );
     expect(screen.getByRole("button", { name: "Check mission" })).toBeVisible();
   });
 
