@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getAllLessonPacks } from "@/lib/lessons/repository";
+import { EXPANDED_GROUP } from "@/lib/network-expansion/schemas";
 
 describe("official lesson packs", () => {
   it("ships two English, evidence-complete, mission-safe packs", () => {
@@ -54,5 +55,28 @@ describe("official lesson packs", () => {
         .filter((edge) => edge.isDisputed)
         .every((edge) => Boolean(edge.disputeNote)),
     ).toBe(true);
+  });
+
+  it("uses the approved mineral constellation family without removing symbol cues", () => {
+    const packs = getAllLessonPacks();
+    const history = packs.find((pack) => pack.id === "french-revolution")!;
+    const literature = packs.find((pack) => pack.id === "romeo-and-juliet")!;
+
+    expect(history.groups.map((group) => group.color)).toEqual([
+      "#b79a5b",
+      "#5d83b1",
+      "#bd5b63",
+      "#8d75ad",
+      "#579583",
+    ]);
+    expect(literature.groups.map((group) => group.color)).toEqual([
+      "#5d83b1",
+      "#bd5b63",
+      "#8d75ad",
+    ]);
+    expect([...history.groups, ...literature.groups].every((group) => group.symbol.length > 0)).toBe(
+      true,
+    );
+    expect(EXPANDED_GROUP.color).toBe("#579583");
   });
 });

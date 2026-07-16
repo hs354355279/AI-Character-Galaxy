@@ -17,11 +17,11 @@
     { "id": "explain-change", "title": "Explain cause and effect", "description": "Use evidence to explain how a changing relationship affected events." }
   ],
   "groups": [
-    { "id": "monarchy", "name": "Monarchy", "color": "#f3c969", "symbol": "C", "description": "The royal household and defenders of inherited authority." },
-    { "id": "constitutional-reform", "name": "Constitutional Reform", "color": "#71c4ff", "symbol": "R", "description": "People seeking political change with constitutional limits." },
-    { "id": "radical-revolution", "name": "Radical Revolution", "color": "#ff6b81", "symbol": "F", "description": "Leaders associated with popular mobilization and radical republican politics." },
-    { "id": "ideas-and-rights", "name": "Ideas and Rights", "color": "#a78bfa", "symbol": "I", "description": "Thinkers and advocates whose writing shaped political arguments." },
-    { "id": "post-revolution", "name": "Post-Revolution Power", "color": "#57d5b2", "symbol": "L", "description": "Leadership that emerged from the Revolution's later instability." }
+    { "id": "monarchy", "name": "Monarchy", "color": "#b79a5b", "symbol": "C", "description": "The royal household and defenders of inherited authority." },
+    { "id": "constitutional-reform", "name": "Constitutional Reform", "color": "#5d83b1", "symbol": "R", "description": "People seeking political change with constitutional limits." },
+    { "id": "radical-revolution", "name": "Radical Revolution", "color": "#bd5b63", "symbol": "F", "description": "Leaders associated with popular mobilization and radical republican politics." },
+    { "id": "ideas-and-rights", "name": "Ideas and Rights", "color": "#8d75ad", "symbol": "I", "description": "Thinkers and advocates whose writing shaped political arguments." },
+    { "id": "post-revolution", "name": "Post-Revolution Power", "color": "#579583", "symbol": "L", "description": "Leadership that emerged from the Revolution's later instability." }
   ],
   "characters": [
     { "id": "louis-xvi", "name": "Louis XVI", "aliases": ["King Louis XVI"], "role": "King of France", "summary": "Louis XVI faced a financial and political crisis and struggled to preserve royal authority as demands for representation grew.", "groupId": "monarchy", "importance": 5, "sourceRefIds": ["fr-wikipedia", "fr-wikidata"], "learningTags": ["monarchy", "constitutional-crisis"] },

@@ -17,9 +17,9 @@
     { "id": "explain-tragedy", "title": "Explain cause and effect", "description": "Use relationship evidence to explain a turning point in the tragedy." }
   ],
   "groups": [
-    { "id": "montague-household", "name": "Montague Household", "color": "#71c4ff", "symbol": "M", "description": "Romeo's family and close companions." },
-    { "id": "capulet-household", "name": "Capulet Household", "color": "#ff7a96", "symbol": "C", "description": "Juliet's family, relatives, and expected match." },
-    { "id": "bridges-and-allies", "name": "Bridges and Allies", "color": "#b9a3ff", "symbol": "B", "description": "Trusted adults and friends who connect the two households." }
+    { "id": "montague-household", "name": "Montague Household", "color": "#5d83b1", "symbol": "M", "description": "Romeo's family and close companions." },
+    { "id": "capulet-household", "name": "Capulet Household", "color": "#bd5b63", "symbol": "C", "description": "Juliet's family, relatives, and expected match." },
+    { "id": "bridges-and-allies", "name": "Bridges and Allies", "color": "#8d75ad", "symbol": "B", "description": "Trusted adults and friends who connect the two households." }
   ],
   "characters": [
     { "id": "romeo", "name": "Romeo Montague", "aliases": ["Romeo"], "role": "Young Montague", "summary": "Romeo acts quickly on intense feelings, choosing a secret marriage that crosses the feud between the two households.", "groupId": "montague-household", "importance": 5, "sourceRefIds": ["rj-gutenberg", "rj-wikidata"], "learningTags": ["love", "impulsiveness", "montague"] },

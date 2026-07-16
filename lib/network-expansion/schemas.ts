@@ -167,7 +167,7 @@ export interface NetworkExpansionModelResult {
 export const EXPANDED_GROUP: CharacterGroup = {
   id: EXPANDED_GROUP_ID,
   name: "Expanded network",
-  color: "#61c9b4",
+  color: "#579583",
   symbol: "AI",
   description: "Web-grounded people added around a selected character with GPT-5.6.",
 };
