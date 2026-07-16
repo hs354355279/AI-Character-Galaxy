@@ -19,6 +19,7 @@ import { RelationshipAxesLegend } from "@/components/galaxy/RelationshipAxesLege
 import { RelationshipField } from "@/components/galaxy/RelationshipField";
 import { RelationshipSpaceController } from "@/components/galaxy/RelationshipSpaceController";
 import { getGalaxyQuality } from "@/lib/galaxy/visual-quality";
+import { getCourseObservatoryPalette } from "@/lib/galaxy/observatory-palette";
 import { fitRelationshipCamera } from "@/lib/layout/relationship-camera";
 import {
   createGalaxyLabelTransform,
@@ -152,6 +153,10 @@ export function GalaxyScene({
   onSelectRelationship: (id: string) => void;
 }) {
   const overviewLayout = useMemo(() => createGalaxyLayout(graph), [graph]);
+  const observatoryPalette = useMemo(
+    () => getCourseObservatoryPalette(graph.id),
+    [graph.id],
+  );
   const semanticLayout = useMemo(
     () => selectedCharacterId ? createRelationshipSpace(graph, selectedCharacterId) : null,
     [graph, selectedCharacterId],
@@ -211,6 +216,8 @@ export function GalaxyScene({
       aria-label="Interactive 3D relationship galaxy"
       data-character-count={graph.characters.length}
       data-relationship-count={graph.relationships.length}
+      data-course-accent={observatoryPalette.accent}
+      data-scene-fog={observatoryPalette.fog}
     >
       <div className="galaxy-canvas-surface">
         <Canvas
@@ -218,11 +225,26 @@ export function GalaxyScene({
           dpr={quality.dpr}
           gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
         >
-          <fog attach="fog" args={["#080c16", 20, 45]} />
-          <ambientLight intensity={0.4} />
-          <hemisphereLight args={["#c5dcff", "#241b32", 1.1]} />
-          <pointLight position={[5, 8, 12]} intensity={16} color="#b8d7ff" />
-          <pointLight position={[-9, -4, 3]} intensity={9} color="#e86c7b" />
+          <fog attach="fog" args={[observatoryPalette.fog, 20, 45]} />
+          <ambientLight intensity={0.28} />
+          <hemisphereLight
+            args={[observatoryPalette.keyLight, observatoryPalette.groundLight, 0.72]}
+          />
+          <pointLight
+            position={[5, 8, 12]}
+            intensity={8}
+            color={observatoryPalette.keyLight}
+          />
+          <pointLight
+            position={[-8, 1, 5]}
+            intensity={4}
+            color={observatoryPalette.fillLight}
+          />
+          <pointLight
+            position={[0, -6, -3]}
+            intensity={2.5}
+            color={observatoryPalette.rimLight}
+          />
           <GalaxyParticles quality={quality} seed={graph.layoutSeed} />
           <RelationshipSpaceController
             positions={positions}
@@ -255,6 +277,8 @@ export function GalaxyScene({
                 position={positions.get(character.id)!}
                 selected={selectedCharacterId === character.id}
                 expanded={character.provenance === "ai-expanded"}
+                selectionColor={observatoryPalette.accent}
+                expandedAccent={observatoryPalette.expandedAccent}
                 animate={quality.animate}
                 onSelect={() => onSelectCharacter(character.id)}
               />

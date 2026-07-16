@@ -204,6 +204,10 @@ test("the editorial observatory palette separates shell, sheet, and ink stage", 
   expect(frenchPalette.workspaceBackground).not.toBe("rgb(238, 236, 229)");
   expect(frenchPalette.stageBackground).not.toBe("rgb(7, 11, 20)");
   expect(frenchPalette.evidenceBackground).not.toBe("rgba(238, 236, 229, 0.97)");
+  await expect(page.locator(".galaxy-canvas")).toHaveAttribute(
+    "data-course-accent",
+    "#bd5b63",
+  );
 
   await page.goto("/learn/romeo-and-juliet?focus=romeo");
   const romeoPalette = await page.locator(".learning-workspace").evaluate((workspace) => {
@@ -216,6 +220,10 @@ test("the editorial observatory palette separates shell, sheet, and ink stage", 
   expect(romeoPalette.className).toContain("learning-workspace--romeo-and-juliet");
   expect(romeoPalette.accent).toMatch(/^(?:lab|oklch)\(/);
   expect(romeoPalette.accent).not.toBe(frenchPalette.accent);
+  await expect(page.locator(".galaxy-canvas")).toHaveAttribute(
+    "data-course-accent",
+    "#8d75ad",
+  );
 });
 
 test("desktop labels remain crisp, readable, and separated while zooming", async ({ page }) => {

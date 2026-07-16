@@ -25,4 +25,16 @@ describe("observatory palette", () => {
       shadow: "#8d4b56",
     });
   });
+
+  it("keeps neutral-cool scene lights while using each course accent for selection", () => {
+    expect(getCourseObservatoryPalette("french-revolution")).toMatchObject({
+      fog: "#0b111e",
+      keyLight: "#d8e2ed",
+      fillLight: "#817792",
+      groundLight: "#292536",
+      rimLight: "#bd5b63",
+      expandedAccent: "#579583",
+    });
+    expect(getCourseObservatoryPalette("romeo-and-juliet").rimLight).toBe("#8d75ad");
+  });
 });

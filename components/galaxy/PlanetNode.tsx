@@ -3,6 +3,7 @@
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
+import { getMineralPlanetColors } from "@/lib/galaxy/observatory-palette";
 
 const vertexShader = `
   varying vec3 vNormal;
@@ -17,6 +18,7 @@ const vertexShader = `
 const fragmentShader = `
   uniform vec3 uBase;
   uniform vec3 uShadow;
+  uniform vec3 uHighlight;
   uniform float uTime;
   uniform float uSeed;
   varying vec3 vNormal;
@@ -27,9 +29,11 @@ const fragmentShader = `
     float field = smoothstep(-0.7, 0.82, ridge + grain);
     vec3 surface = mix(uShadow, uBase, field);
     vec3 lightDirection = normalize(vec3(-0.35, 0.68, 0.72));
-    float diffuse = 0.32 + max(dot(normalize(vNormal), lightDirection), 0.0) * 0.78;
-    float rim = pow(1.0 - abs(vNormal.z), 3.0) * 0.24;
-    gl_FragColor = vec4(surface * diffuse + uBase * rim, 1.0);
+    float facing = max(dot(normalize(vNormal), lightDirection), 0.0);
+    float diffuse = 0.42 + facing * 0.58;
+    float mineralSheen = pow(facing, 7.0) * 0.16;
+    float rim = pow(1.0 - abs(vNormal.z), 3.0) * 0.1;
+    gl_FragColor = vec4(surface * diffuse + uHighlight * (mineralSheen + rim), 1.0);
   }
 `;
 
@@ -44,6 +48,8 @@ export function PlanetNode({
   position,
   selected,
   expanded,
+  selectionColor,
+  expandedAccent,
   animate,
   onSelect,
 }: {
@@ -53,6 +59,8 @@ export function PlanetNode({
   position: THREE.Vector3;
   selected: boolean;
   expanded: boolean;
+  selectionColor: string;
+  expandedAccent: string;
   animate: boolean;
   onSelect: () => void;
 }) {
@@ -61,9 +69,12 @@ export function PlanetNode({
   const groupRef = useRef<THREE.Group>(null);
   const surfaceRef = useRef<THREE.ShaderMaterial>(null);
   const colors = useMemo(() => {
-    const base = new THREE.Color(color).lerp(new THREE.Color("#f0ece2"), 0.18);
-    const shadow = new THREE.Color(color).multiplyScalar(0.34);
-    return { base, shadow };
+    const mineral = getMineralPlanetColors(color);
+    return {
+      base: new THREE.Color(mineral.base),
+      highlight: new THREE.Color(mineral.highlight),
+      shadow: new THREE.Color(mineral.shadow),
+    };
   }, [color]);
 
   useFrame(({ clock }, delta) => {
@@ -98,6 +109,7 @@ export function PlanetNode({
           uniforms={{
             uBase: { value: colors.base },
             uShadow: { value: colors.shadow },
+            uHighlight: { value: colors.highlight },
             uTime: { value: 0 },
             uSeed: { value: seed * 0.17 },
           }}
@@ -106,38 +118,36 @@ export function PlanetNode({
       <mesh raycast={disableRaycast} scale={1.11}>
         <sphereGeometry args={[size, 32, 32]} />
         <meshBasicMaterial
-          color={color}
+          color={selected ? selectionColor : colors.highlight}
           side={THREE.BackSide}
-          blending={THREE.AdditiveBlending}
           transparent
-          opacity={selected ? 0.3 : 0.13}
+          opacity={selected ? 0.2 : 0.07}
           depthWrite={false}
         />
       </mesh>
       <mesh raycast={disableRaycast} rotation={[Math.PI / 2 + seed * 0.006, 0, 0]}>
         <torusGeometry args={[size * 1.55, size * 0.035, 8, 64]} />
-        <meshBasicMaterial color={color} transparent opacity={selected ? 0.9 : 0.36} depthWrite={false} />
+        <meshBasicMaterial color={color} transparent opacity={selected ? 0.64 : 0.24} depthWrite={false} />
       </mesh>
       {expanded ? (
         <mesh raycast={disableRaycast} rotation={[Math.PI / 2 - seed * 0.004, 0.35, 0]}>
           <torusGeometry args={[size * 2.25, size * 0.026, 8, 72]} />
           <meshBasicMaterial
-            color="#61c9b4"
-            blending={THREE.AdditiveBlending}
+            color={expandedAccent}
             transparent
-            opacity={0.72}
+            opacity={0.48}
             depthWrite={false}
           />
         </mesh>
       ) : null}
       <mesh raycast={disableRaycast} rotation={[Math.PI / 2 + seed * 0.006, 0, 0]}>
         <torusGeometry args={[size * 1.9, size * 0.012, 6, 64]} />
-        <meshBasicMaterial color="#f4f0e7" transparent opacity={selected ? 0.7 : 0.12} depthWrite={false} />
+        <meshBasicMaterial color={colors.highlight} transparent opacity={selected ? 0.42 : 0.07} depthWrite={false} />
       </mesh>
       {selected ? (
         <mesh raycast={disableRaycast} scale={1.34}>
           <sphereGeometry args={[size, 20, 20]} />
-          <meshBasicMaterial color="#ffffff" transparent opacity={0.3} wireframe depthWrite={false} />
+          <meshBasicMaterial color={selectionColor} transparent opacity={0.46} wireframe depthWrite={false} />
         </mesh>
       ) : null}
     </group>

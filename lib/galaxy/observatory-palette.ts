@@ -16,6 +16,8 @@ export interface CourseObservatoryPalette {
   keyLight: string;
   fillLight: string;
   groundLight: string;
+  rimLight: string;
+  expandedAccent: string;
 }
 
 const COURSE_OBSERVATORY_PALETTES: Record<string, CourseObservatoryPalette> = {
@@ -27,6 +29,8 @@ const COURSE_OBSERVATORY_PALETTES: Record<string, CourseObservatoryPalette> = {
     keyLight: "#d8e2ed",
     fillLight: "#817792",
     groundLight: "#292536",
+    rimLight: MINERAL_GROUP_COLORS.radical,
+    expandedAccent: MINERAL_GROUP_COLORS.postRevolution,
   },
   "romeo-and-juliet": {
     accent: MINERAL_GROUP_COLORS.ideas,
@@ -36,6 +40,8 @@ const COURSE_OBSERVATORY_PALETTES: Record<string, CourseObservatoryPalette> = {
     keyLight: "#d8e2ed",
     fillLight: "#817792",
     groundLight: "#292536",
+    rimLight: MINERAL_GROUP_COLORS.ideas,
+    expandedAccent: MINERAL_GROUP_COLORS.postRevolution,
   },
 };
 
