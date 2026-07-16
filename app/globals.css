@@ -4355,9 +4355,28 @@ button {
 
 /* Editorial observatory: the final source of truth for active lesson composition. */
 .learning-workspace {
-  --observatory-paper: #eeece5;
-  --observatory-paper-raised: #e2ded3;
-  --observatory-ink: #11110f;
+  --obs-shell: oklch(96.2% 0.008 255);
+  --obs-shell-raised: oklch(92.5% 0.012 255);
+  --obs-sheet: oklch(98% 0.006 255);
+  --obs-ink: oklch(19% 0.018 255);
+  --obs-muted: oklch(43% 0.018 255);
+  --obs-rule: oklch(76% 0.014 255);
+  --obs-stage: oklch(13.5% 0.022 258);
+  --obs-stage-raised: oklch(18.5% 0.028 258);
+  --obs-stage-active: oklch(23% 0.032 258);
+  --obs-stage-ink: oklch(92% 0.012 255);
+  --obs-stage-muted: oklch(70% 0.02 255);
+  --obs-stage-rule: oklch(34% 0.025 258);
+  --obs-accent: oklch(61% 0.145 24);
+  --obs-accent-strong: oklch(46% 0.13 24);
+  --obs-accent-soft: oklch(91% 0.032 24);
+  --observatory-paper: var(--obs-shell);
+  --observatory-paper-raised: var(--obs-shell-raised);
+  --observatory-ink: var(--obs-ink);
+  --paper-ink: var(--obs-ink);
+  --ink: var(--obs-stage-ink);
+  --ink-muted: var(--obs-stage-muted);
+  --line: var(--obs-stage-rule);
   height: 100svh;
   min-height: 0;
   overflow: hidden;
@@ -4366,10 +4385,27 @@ button {
   background: var(--observatory-paper);
 }
 
+.learning-workspace--french-revolution {
+  --obs-accent: oklch(61% 0.145 24);
+  --obs-accent-strong: oklch(46% 0.13 24);
+  --obs-accent-soft: oklch(91% 0.032 24);
+}
+
+.learning-workspace--romeo-and-juliet {
+  --obs-accent: oklch(61% 0.12 315);
+  --obs-accent-strong: oklch(46% 0.105 315);
+  --obs-accent-soft: oklch(91% 0.028 315);
+}
+
 .learning-workspace .exhibition-header {
   top: 0.65rem;
   left: 0.7rem;
   width: calc(100% - 1.4rem);
+  color: var(--obs-ink);
+  border-color: color-mix(in oklch, var(--obs-rule) 72%, transparent);
+  background: color-mix(in oklch, var(--obs-sheet) 92%, transparent);
+  box-shadow: 0 0.65rem 2.2rem color-mix(in oklch, var(--obs-ink) 7%, transparent);
+  backdrop-filter: blur(18px) saturate(108%);
 }
 
 .learning-workspace .exhibition-header-inner {
@@ -4377,24 +4413,24 @@ button {
 }
 
 .learning-workspace .view-toggle {
-  border-color: rgba(17, 17, 15, 0.18);
-  background: rgba(17, 17, 15, 0.04);
+  border-color: var(--obs-rule);
+  background: var(--obs-shell-raised);
 }
 
 .learning-workspace .view-toggle button,
 .learning-workspace .header-action {
-  color: rgba(17, 17, 15, 0.68);
+  color: var(--obs-muted);
 }
 
 .learning-workspace .view-toggle button[aria-pressed="true"] {
-  color: #f3f1ea;
-  background: var(--observatory-ink);
+  color: var(--obs-sheet);
+  background: var(--obs-ink);
   box-shadow: none;
 }
 
 .learning-workspace .header-action:hover {
-  color: var(--observatory-ink);
-  background: rgba(17, 17, 15, 0.07);
+  color: var(--obs-ink);
+  background: var(--obs-shell-raised);
 }
 
 .observatory-shell {
@@ -4412,8 +4448,8 @@ button {
   overflow: auto;
   padding: clamp(1.4rem, 2.2vw, 2.2rem) clamp(1.15rem, 1.8vw, 1.8rem);
   color: var(--observatory-ink);
-  border-right: 1px solid rgba(17, 17, 15, 0.18);
-  background: var(--observatory-paper);
+  border-right: 1px solid var(--obs-rule);
+  background: var(--obs-shell);
   overscroll-behavior: contain;
   animation: observatory-panel-in 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -4424,8 +4460,8 @@ button {
   min-height: 0;
   display: block;
   overflow: hidden;
-  color: #f3f1ea;
-  background: #070b14;
+  color: var(--obs-stage-ink);
+  background: var(--obs-stage);
 }
 
 .observatory-caption {
@@ -4440,8 +4476,8 @@ button {
   align-items: center;
   gap: 1rem;
   padding: 0.8rem 1rem;
-  border-bottom: 1px solid rgba(243, 241, 234, 0.14);
-  background: rgba(7, 11, 20, 0.94);
+  border-bottom: 1px solid var(--obs-stage-rule);
+  background: color-mix(in oklch, var(--obs-stage) 94%, transparent);
   font-size: 0.7rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -4449,7 +4485,7 @@ button {
 
 .observatory-caption span,
 .observatory-caption i {
-  color: rgba(243, 241, 234, 0.54);
+  color: var(--obs-stage-muted);
   font-style: normal;
 }
 
@@ -4491,7 +4527,9 @@ button {
   max-width: calc(100% - 26rem);
   margin: 0;
   border-radius: 0;
-  background: rgba(7, 11, 20, 0.94);
+  color: var(--obs-stage-ink);
+  border: 1px solid var(--obs-stage-rule);
+  background: color-mix(in oklch, var(--obs-stage-raised) 94%, transparent);
 }
 
 .evidence-panel {
@@ -4504,9 +4542,9 @@ button {
   overflow: auto;
   padding: 1.3rem;
   color: var(--observatory-ink);
-  border: 1px solid rgba(17, 17, 15, 0.2);
-  background: rgba(238, 236, 229, 0.97);
-  box-shadow: -1.2rem 1.2rem 3rem rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--obs-rule);
+  background: color-mix(in oklch, var(--obs-sheet) 97%, transparent);
+  box-shadow: 0 0.8rem 2.4rem color-mix(in oklch, var(--obs-ink) 9%, transparent);
   overscroll-behavior: contain;
   animation: observatory-panel-in 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -4527,9 +4565,9 @@ button {
 .learning-workspace .character-rail {
   min-width: 0;
   padding: 0.7rem;
-  color: #f3f1ea;
-  border: 1px solid rgba(243, 241, 234, 0.18);
-  background: rgba(7, 11, 20, 0.96);
+  color: var(--obs-stage-ink);
+  border: 1px solid var(--obs-stage-rule);
+  background: color-mix(in oklch, var(--obs-stage-raised) 96%, transparent);
 }
 
 .learning-workspace .character-rail-track button {
@@ -4539,15 +4577,17 @@ button {
 
 .learning-workspace .relationship-axes-legend {
   bottom: 8.5rem;
+  color: var(--obs-stage-muted);
+  border-color: var(--obs-stage-rule);
   border-radius: 0;
-  background: rgba(7, 11, 20, 0.92);
+  background: color-mix(in oklch, var(--obs-stage-raised) 94%, transparent);
   backdrop-filter: none;
 }
 
 .mission-content .eyebrow,
 .mission-progress-row > span,
 .evidence-content .eyebrow {
-  color: rgba(17, 17, 15, 0.58);
+  color: var(--obs-muted);
 }
 
 .mission-content h2 {
@@ -4559,7 +4599,7 @@ button {
 .mission-content > p,
 .evidence-content > p,
 .evidence-empty p {
-  color: rgba(17, 17, 15, 0.68);
+  color: var(--obs-muted);
 }
 
 .mission-progress-track {
@@ -4577,8 +4617,8 @@ button {
 
 .mission-progress-track li {
   padding-top: 0.45rem;
-  color: rgba(17, 17, 15, 0.45);
-  border-top: 1px solid rgba(17, 17, 15, 0.24);
+  color: var(--obs-muted);
+  border-top: 1px solid var(--obs-rule);
   font-size: 0.62rem;
 }
 
@@ -4588,8 +4628,8 @@ button {
 }
 
 .mission-progress-track li[data-state="current"] {
-  color: var(--observatory-ink);
-  border-color: var(--observatory-ink);
+  color: var(--obs-accent-strong);
+  border-color: var(--obs-accent);
   font-weight: 800;
 }
 
@@ -4607,21 +4647,21 @@ button {
 
 .mission-response textarea {
   color: var(--observatory-ink);
-  border-color: rgba(17, 17, 15, 0.24);
+  border-color: var(--obs-rule);
   border-radius: 0;
-  background: rgba(255, 255, 255, 0.42);
+  background: var(--obs-sheet);
 }
 
 .mission-actions .primary-action {
-  color: #f3f1ea;
-  border-color: var(--observatory-ink);
+  color: var(--obs-sheet);
+  border-color: var(--obs-accent-strong);
   border-radius: 999px;
-  background: var(--observatory-ink);
+  background: var(--obs-accent-strong);
 }
 
 .mission-actions .secondary-action {
   color: var(--observatory-ink);
-  border-color: rgba(17, 17, 15, 0.28);
+  border-color: var(--obs-rule);
   border-radius: 999px;
   background: transparent;
 }
@@ -4632,9 +4672,9 @@ button {
 .dispute-note,
 .evidence-panel .ai-insight {
   color: var(--observatory-ink);
-  border-color: rgba(17, 17, 15, 0.2);
+  border-color: var(--obs-rule);
   border-radius: 0;
-  background: rgba(255, 255, 255, 0.3);
+  background: var(--obs-accent-soft);
 }
 
 .mission-hint p,
@@ -4643,7 +4683,7 @@ button {
 .evidence-panel .ai-insight-result p,
 .evidence-panel .ai-insight-result small,
 .evidence-panel .ai-status {
-  color: rgba(17, 17, 15, 0.68);
+  color: var(--obs-muted);
 }
 
 .evidence-content h2,
@@ -4654,7 +4694,7 @@ button {
 
 .evidence-content > a,
 .evidence-panel .ai-insight-result strong {
-  color: var(--observatory-ink);
+  color: var(--obs-accent-strong);
 }
 
 .evidence-badge,
@@ -4662,7 +4702,7 @@ button {
 .evidence-panel .ai-action,
 .evidence-panel .ai-source-label {
   color: var(--observatory-ink);
-  border-color: rgba(17, 17, 15, 0.24);
+  border-color: var(--obs-rule);
   background: transparent;
 }
 
@@ -4678,7 +4718,7 @@ button {
 }
 
 .learning-workspace :where(button, a, summary, textarea):focus-visible {
-  outline: 2px solid currentColor;
+  outline: 2px solid var(--obs-accent);
   outline-offset: 3px;
 }
 
@@ -4717,7 +4757,7 @@ button {
   .mission-panel {
     max-height: none;
     border-right: 0;
-    border-bottom: 1px solid rgba(17, 17, 15, 0.18);
+    border-bottom: 1px solid var(--obs-rule);
   }
 
   .observatory-stage {

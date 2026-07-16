@@ -176,6 +176,48 @@ test("the editorial observatory uses paper guidance around a dominant ink stage"
   expect(proportions.stage / proportions.shell).toBeGreaterThan(0.7);
 });
 
+test("the editorial observatory palette separates shell, sheet, and ink stage", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/learn/french-revolution?focus=robespierre");
+
+  const frenchPalette = await page.evaluate(() => {
+    const workspace = document.querySelector<HTMLElement>(".learning-workspace")!;
+    const stage = document.querySelector<HTMLElement>(".observatory-stage")!;
+    const evidence = document.querySelector<HTMLElement>(".evidence-panel")!;
+    const workspaceStyle = getComputedStyle(workspace);
+
+    return {
+      className: workspace.className,
+      shell: workspaceStyle.getPropertyValue("--obs-shell").trim(),
+      accent: workspaceStyle.getPropertyValue("--obs-accent").trim(),
+      workspaceBackground: workspaceStyle.backgroundColor,
+      stageBackground: getComputedStyle(stage).backgroundColor,
+      evidenceBackground: getComputedStyle(evidence).backgroundColor,
+    };
+  });
+
+  expect(frenchPalette).toMatchObject({
+    className: expect.stringContaining("learning-workspace--french-revolution"),
+    shell: expect.stringMatching(/^(?:lab|oklch)\(/),
+    accent: expect.stringMatching(/^(?:lab|oklch)\(/),
+  });
+  expect(frenchPalette.workspaceBackground).not.toBe("rgb(238, 236, 229)");
+  expect(frenchPalette.stageBackground).not.toBe("rgb(7, 11, 20)");
+  expect(frenchPalette.evidenceBackground).not.toBe("rgba(238, 236, 229, 0.97)");
+
+  await page.goto("/learn/romeo-and-juliet?focus=romeo");
+  const romeoPalette = await page.locator(".learning-workspace").evaluate((workspace) => {
+    const style = getComputedStyle(workspace);
+    return {
+      className: workspace.className,
+      accent: style.getPropertyValue("--obs-accent").trim(),
+    };
+  });
+  expect(romeoPalette.className).toContain("learning-workspace--romeo-and-juliet");
+  expect(romeoPalette.accent).toMatch(/^(?:lab|oklch)\(/);
+  expect(romeoPalette.accent).not.toBe(frenchPalette.accent);
+});
+
 test("desktop labels remain crisp, readable, and separated while zooming", async ({ page }) => {
   for (const viewport of [{ width: 1440, height: 900 }, { width: 2048, height: 1024 }]) {
     await page.setViewportSize(viewport);
